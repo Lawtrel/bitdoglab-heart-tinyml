@@ -64,7 +64,7 @@ Mean e standard deviation são ajustados **somente em training**. O tensor tem 1
 ## A CNN e seu training
 
 
- | Layer | Output shape | Parameters | 
+ | Layer | Output shape | Parameters |
 | --- | --- | --- |
 | Input | 186 × 24 × 1 | 0 |
 | Conv2D 3×3 + ReLU | 186 × 24 × 8 | (9×1 + 1)×8 = 80 |
@@ -90,7 +90,7 @@ Weighted cross-entropy reduz a dominância da classe maior e de grupos com muita
 A scale representa o passo entre códigos e o zero-point representa o zero real. No input deste modelo: **scale = 0,04310979694; zero-point = −38**. O rounding usado é half away from zero, seguido por saturation.
 
 
- | Conta | Valor | 
+ | Conta | Valor |
 | --- | --- |
 | Input z = 1,0000 | round(1 / 0,04310979694) − 38 = −15 |
 | Reconstrução | (−15 + 38) × 0,04310979694 = 0,991525 |
@@ -106,7 +106,7 @@ A post-training quantization usou 300 janelas de training para calibration. Não
 ## Como escolhi o modelo
 
 
- | Partição | Grupos | Present / Absent | Recordings / windows | 
+ | Partição | Grupos | Present / Absent | Recordings / windows |
 | --- | --- | --- | --- |
 | Training | 568 | 109 / 459 | 2.066 / 28.340 |
 | Validation | 122 | 24 / 98 | 439 / 6.154 |
@@ -124,7 +124,7 @@ Três seeds: 42, 43 e 44. O checkpoint escolhido foi seed 43, época 66, pelo F1
 Faço mean dos window scores em cada recording. Depois tomo o maximum entre recordings do mesmo grupo. O threshold é escolhido em validation. No INT8, τ = 0,734675480769; no Float32, τ = 0,725111204844.
 
 
- | Referência do grupo | Previsto com sopro | Previsto sem sopro | 
+ | Referência do grupo | Previsto com sopro | Previsto sem sopro |
 | --- | --- | --- |
 | Present | 17 true positives | 7 false negatives |
 | Absent | 8 false positives | 90 true negatives |
@@ -141,7 +141,7 @@ O F1 teve IC95% de 0,526 a 0,829, por patient bootstrap com 2.000 repetições. 
 O benchmark de 27/10/2026 foi concluído: 100 validation windows, dez warm-up calls e três repetições, batch size um. Os cinco modos usam os mesmos PCM e o mesmo modelo treinado. Não houve novo training nem mudança do threshold.
 
 
- | Execução | Inference mediana (ms) | MFE + network (ms) | 
+ | Execução | Inference mediana (ms) | MFE + network (ms) |
 | --- | --- | --- |
 | CPU Float32 / TensorFlow | 0,661 | 0,836 |
 | RTX Float32 / TensorFlow | 0,768 | 0,956 |
@@ -161,7 +161,7 @@ O test completo original permanece com F1 0,694 na placa. O benchmark novo é um
 ## Áudios para a apresentação
 
 
- | Áudio | Recording | Rótulo do grupo | Score / previsão | 
+ | Áudio | Recording | Rótulo do grupo | Score / previsão |
 | --- | --- | --- | --- |
 | 1 | 39043_AV | Sopro ausente | 0.56640625 / sem sopro |
 | 2 | 49627_AV | Sopro presente | 0.8984375 / com sopro |

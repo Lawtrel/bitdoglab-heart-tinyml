@@ -17,5 +17,5 @@
 src/heart_tinyml/resources/model/normalization.json -text
 
 # Preserve audited benchmark records byte for byte.
-docs/evidence/validation-benchmark-20261027/*.json -text
-docs/evidence/validation-benchmark-20261027/*.jsonl -text
+docs/evidence/validation-benchmark-20261027/*.json -text whitespace=cr-at-eol
+docs/evidence/validation-benchmark-20261027/*.jsonl -text whitespace=cr-at-eol
