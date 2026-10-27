@@ -12,3 +12,6 @@
 *.png binary
 *.pptx binary
 *.pdf binary
+
+# Preserve exact bytes covered by the frozen normalization SHA256.
+src/heart_tinyml/resources/model/normalization.json -text

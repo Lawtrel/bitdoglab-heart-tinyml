@@ -44,3 +44,5 @@ As fontes C++ de `apps/demo` e `apps/benchmark` foram mantidas; o CMake e a loca
 ## Limites HTTP
 
 Loopback, validação de Host e Origin, nonce CSRF sem código na URL, lista fechada de recursos estáticos, limite de tamanho e respostas de erro separadas. A configuração não deve ser ampliada para acesso público sem um desenho de autenticação/deploy próprio.
+
+O arquivo de normalização é versionado com `-text` em `.gitattributes`: seu SHA256 cobre bytes exatos, inclusive quebras de linha. Isso mantém a verificação idêntica em clones Windows e Linux sem alterar coeficientes ou afrouxar a integridade.
