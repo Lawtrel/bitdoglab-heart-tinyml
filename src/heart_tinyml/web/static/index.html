@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="demo-nonce" content="__DEMO_NONCE__">
+  <title>TinyML na BitDogLab</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">INTRODUÇÃO À INTELIGÊNCIA ARTIFICIAL</p>
+    <h1>TinyML na BitDogLab</h1>
+    <p>Ouça um som cardíaco e veja uma rede neural pequena executar no computador e na placa.</p>
+  </header>
+  <nav aria-label="Conteúdo">
+    <button class="tab active" data-pane="demo">Demonstração</button>
+    <button class="tab" data-pane="results">Resultados do estudo</button>
+    <button class="tab" data-pane="timing">Comparação de tempo</button>
+  </nav>
+  <section id="demo" class="pane">
+    <div class="workspace">
+      <section class="input-panel">
+        <h2>1. Escolha e ouça um áudio</h2>
+        <div class="actions">
+          <button class="sample" data-sample="1">Áudio 1</button>
+          <button class="sample" data-sample="2">Áudio 2</button>
+          <label class="upload">Abrir WAV<input id="file" type="file" accept=".wav,audio/wav"></label>
+        </div>
+        <p id="filename" class="subtle">Escolha um dos exemplos para começar.</p>
+        <audio id="player" controls></audio>
+        <details>
+          <summary>Usar outro trecho do arquivo</summary>
+          <label>Início em segundos <input id="offset" type="number" value="0" min="0" step="0.5"></label>
+          <p class="small">Analisamos 3 segundos. Aceita WAV PCM16 mono/estéreo. Conversões e preenchimento com zeros são identificados.</p>
+        </details>
+        <h2>2. Execute a rede no computador</h2>
+        <button id="analyze" class="primary" disabled>Analisar no PC</button>
+        <p class="small">O modelo já está treinado. Esta ação faz apenas a inferência.</p>
+        <div class="board-tools">
+          <h2>3. Compare com a placa</h2>
+          <p id="connection" class="subtle">Opcional. O computador funciona sem a placa.</p>
+          <div class="actions">
+            <select id="port" aria-label="Porta da BitDogLab"><option value="auto">Escolha automática</option></select>
+            <button id="connect">Conectar placa</button>
+          </div>
+          <button id="compare" disabled>Comparar o mesmo áudio por USB</button>
+          <details>
+            <summary>Microfone experimental</summary>
+            <p class="small">Depois do aviso sonoro, reproduza o áudio perto do microfone durante 3 segundos. A captura real da placa será analisada nos dois dispositivos.</p>
+            <button id="capture" disabled>Capturar na placa</button>
+            <p class="small">Esse modo ainda precisa de validação acústica. A placa não equivale a um estetoscópio.</p>
+          </details>
+        </div>
+      </section>
+      <section class="output-panel">
+        <h2>Resultado da execução</h2>
+        <p id="status" role="status">Escolha um áudio e clique em Analisar no PC.</p>
+        <div class="predictions">
+          <div id="pc-result" class="prediction"><span>COMPUTADOR</span><strong>Aguardando análise</strong></div>
+          <div id="board-result" class="prediction"><span>BITDOGLAB</span><strong>Sem medição nesta sessão</strong></div>
+        </div>
+        <h3>Forma de onda</h3>
+        <canvas id="wave" width="1000" height="180" aria-label="Forma de onda do áudio"></canvas>
+        <p class="axis">0 a 3 segundos, amplitude normalizada, visualização reduzida</p>
+        <h3>O que a rede recebe: MFE</h3>
+        <canvas id="mfe" width="744" height="192" aria-label="Mapa das energias mel"></canvas>
+        <p class="axis">24 filtros mel, 30 a 1.800 Hz. As cores representam log-energia ao longo do tempo.</p>
+        <p id="details" class="small"></p>
+        <button id="download" disabled>Salvar registro da análise</button>
+      </section>
+    </div>
+    <p class="notice">“Sem sopro” é uma previsão para este trecho. A rede não identifica doenças e pode atribuir uma classe até para fala ou ruído. Os exemplos ilustram o funcionamento; as métricas do estudo são calculadas por grupo.</p>
+  </section>
+  <section id="results" class="pane" hidden>
+    <h2>Teste científico concluído</h2>
+    <p>6.512 janelas, 471 gravações e 122 grupos. Estes números pertencem ao firmware científico e são separados dos testes do microfone.</p>
+    <div id="metrics"></div>
+    <h2>Acertos e erros da BitDogLab</h2>
+    <div id="confusion"></div>
+    <p id="result-explanation"></p>
+    <p class="small">A placa e o PC de referência coincidiram nas decisões dos 122 grupos. Houve diferenças numéricas em features/escores e uma decisão diferente em relação ao PC otimizado. Não há equivalência bit a bit do processamento completo.</p>
+  </section>
+  <section id="timing" class="pane" hidden>
+    <h2>Tempo para processar uma janela de 3 segundos</h2>
+    <p>As mesmas 100 janelas de validação, com o mesmo modelo. CPU com uma thread no PC; medidas históricas do firmware científico a 133 MHz na placa.</p>
+    <div id="timing-table"></div>
+    <p class="notice">A comparação inclui implementações diferentes: MFE NumPy e LiteRT no PC, C++ e TFLite Micro na placa. Exclui aquisição, arquivos, USB, OLED e reprodução. Não usa a RTX e não mede isoladamente o efeito da quantização.</p>
+    <p id="machine" class="small"></p>
+  </section>
+  <footer>Projeto desenvolvido por Leandro Alves dos Santos durante as aulas de Introdução à Inteligência Artificial.</footer>
+</main>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

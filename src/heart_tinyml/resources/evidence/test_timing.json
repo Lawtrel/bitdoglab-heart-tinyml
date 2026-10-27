@@ -1,0 +1,22 @@
+{
+  "windows": 6512,
+  "units": "microseconds",
+  "scope": "MFE and Invoke only, excludes acquisition/USB/CRC/display",
+  "timings": {
+    "preprocessing_us": {
+      "median": 1006536.0,
+      "p95": 1008024.9,
+      "maximum": 1011607.0
+    },
+    "inference_us": {
+      "median": 311868.0,
+      "p95": 311884.0,
+      "maximum": 312178.0
+    },
+    "processing_us": {
+      "median": 1318405.0,
+      "p95": 1319889.45,
+      "maximum": 1323475.0
+    }
+  }
+}

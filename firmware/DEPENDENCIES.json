@@ -1,0 +1,9 @@
+{
+  "pico_sdk": {"repository": "https://github.com/raspberrypi/pico-sdk", "commit": "95ea6acad131124694cda1c162c52cd30e0aece0", "tag": "2.1.0"},
+  "pico_tflmicro": {"repository": "https://github.com/raspberrypi/pico-tflmicro", "commit": "dfea53b977f131dc50d7060568ad4fd355d4d71e"},
+  "tinyusb": {"repository": "https://github.com/hathach/tinyusb", "commit": "5217cee5de4cd555018da90f9f1bcc87fb1c1d3a"},
+  "arm_gnu": "14.2.Rel1",
+  "cmake": "3.31.6",
+  "ninja": "1.11.1.4",
+  "note": "Dependências identificadas no build histórico. Não são vendorizadas no repositório. Layout CMake reorganizado requer build novo."
+}

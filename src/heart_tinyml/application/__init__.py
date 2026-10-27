@@ -1,0 +1,1 @@
+"""application do aplicativo TinyML."""

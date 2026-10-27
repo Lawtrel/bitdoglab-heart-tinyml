@@ -1,0 +1,1 @@
+"""domain do aplicativo TinyML."""

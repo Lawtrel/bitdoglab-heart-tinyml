@@ -1,0 +1,247 @@
+{
+  "threshold_unchanged": 0.7346754807692307,
+  "patients": 122,
+  "windows": 6512,
+  "rp2040": {
+    "f1": 0.6938775510204082,
+    "recall": 0.7083333333333334,
+    "precision": 0.68,
+    "accuracy": 0.8770491803278688,
+    "specificity": 0.9183673469387755,
+    "macro_f1": 0.8084772370486657,
+    "tp": 17,
+    "tn": 90,
+    "fp": 8,
+    "fn": 7,
+    "support_present": 24,
+    "support_absent": 98,
+    "threshold": 0.7346754807692307,
+    "patients": 122,
+    "undefined_metrics": [],
+    "bootstrap": {
+      "method": "ordinary_patient_bootstrap_percentile",
+      "replicates": 2000,
+      "seed": 2026,
+      "intervals": {
+        "f1": {
+          "ci95": [
+            0.5263157894736842,
+            0.8292913023469856
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "recall": {
+          "ci95": [
+            0.5184865900383141,
+            0.88
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "precision": {
+          "ci95": [
+            0.48148148148148145,
+            0.8571428571428571
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "accuracy": {
+          "ci95": [
+            0.8114754098360656,
+            0.9344262295081968
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "specificity": {
+          "ci95": [
+            0.8571428571428571,
+            0.96875
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "macro_f1": {
+          "ci95": [
+            0.7123998114097124,
+            0.8928414580588493
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        }
+      }
+    },
+    "unit": "patient"
+  },
+  "reference_host": {
+    "f1": 0.6938775510204082,
+    "recall": 0.7083333333333334,
+    "precision": 0.68,
+    "accuracy": 0.8770491803278688,
+    "specificity": 0.9183673469387755,
+    "macro_f1": 0.8084772370486657,
+    "tp": 17,
+    "tn": 90,
+    "fp": 8,
+    "fn": 7,
+    "support_present": 24,
+    "support_absent": 98,
+    "threshold": 0.7346754807692307,
+    "patients": 122,
+    "undefined_metrics": [],
+    "bootstrap": {
+      "method": "ordinary_patient_bootstrap_percentile",
+      "replicates": 2000,
+      "seed": 2026,
+      "intervals": {
+        "f1": {
+          "ci95": [
+            0.5263157894736842,
+            0.8292913023469856
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "recall": {
+          "ci95": [
+            0.5184865900383141,
+            0.88
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "precision": {
+          "ci95": [
+            0.48148148148148145,
+            0.8571428571428571
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "accuracy": {
+          "ci95": [
+            0.8114754098360656,
+            0.9344262295081968
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "specificity": {
+          "ci95": [
+            0.8571428571428571,
+            0.96875
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "macro_f1": {
+          "ci95": [
+            0.7123998114097124,
+            0.8928414580588493
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        }
+      }
+    },
+    "unit": "patient"
+  },
+  "original_host_saved": {
+    "f1": 0.68,
+    "recall": 0.7083333333333334,
+    "precision": 0.6538461538461539,
+    "accuracy": 0.8688524590163934,
+    "specificity": 0.9081632653061225,
+    "macro_f1": 0.7987628865979381,
+    "tp": 17,
+    "tn": 89,
+    "fp": 9,
+    "fn": 7,
+    "support_present": 24,
+    "support_absent": 98,
+    "threshold": 0.7346754807692307,
+    "patients": 122,
+    "undefined_metrics": []
+  },
+  "board_reference_patient_prediction_agreement": 1.0,
+  "board_original_host_patient_prediction_agreement": 0.9918032786885246,
+  "max_board_reference_window_probability_difference": 0.0078125,
+  "max_board_original_host_window_probability_difference": 0.078125,
+  "input_crc_mismatch_windows": 86,
+  "note": "Original host AUTO/XNNPACK metrics remain unchanged. All test windows included; no tuning on disagreements.",
+  "float_host": {
+    "f1": 0.6938775510204082,
+    "recall": 0.7083333333333334,
+    "precision": 0.68,
+    "accuracy": 0.8770491803278688,
+    "specificity": 0.9183673469387755,
+    "macro_f1": 0.8084772370486657,
+    "tp": 17,
+    "tn": 90,
+    "fp": 8,
+    "fn": 7,
+    "support_present": 24,
+    "support_absent": 98,
+    "threshold": 0.7251112048442547,
+    "patients": 122,
+    "undefined_metrics": [],
+    "bootstrap": {
+      "method": "ordinary_patient_bootstrap_percentile",
+      "replicates": 2000,
+      "seed": 2026,
+      "intervals": {
+        "f1": {
+          "ci95": [
+            0.5263157894736842,
+            0.8292913023469856
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "recall": {
+          "ci95": [
+            0.5184865900383141,
+            0.88
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "precision": {
+          "ci95": [
+            0.48148148148148145,
+            0.8571428571428571
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "accuracy": {
+          "ci95": [
+            0.8114754098360656,
+            0.9344262295081968
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "specificity": {
+          "ci95": [
+            0.8571428571428571,
+            0.96875
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        },
+        "macro_f1": {
+          "ci95": [
+            0.7123998114097124,
+            0.8928414580588493
+          ],
+          "valid_replicates": 2000,
+          "invalid_replicates": 0
+        }
+      }
+    },
+    "unit": "patient"
+  }
+}

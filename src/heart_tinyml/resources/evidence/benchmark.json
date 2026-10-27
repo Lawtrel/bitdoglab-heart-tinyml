@@ -1,0 +1,69 @@
+{
+  "status": "complete",
+  "kind": "supplementary_pc_cpu_validation_benchmark",
+  "utc": "2026-10-24T22:34:18.641816+00:00",
+  "windows": 100,
+  "warmups_excluded": 10,
+  "selection": "Same ordered 100 first-three-second validation PCM windows as existing board validation; no test or labels used for tuning",
+  "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+  "provenance": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+    "logical_cpus": 12,
+    "python": "3.12.14",
+    "numpy": "2.0.2",
+    "litert": "2.3.0",
+    "runtime": "LiteRT BUILTIN_REF CPU, 1 thread, MFE NumPy",
+    "thread_environment": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    },
+    "cpu_marketing_name": "N\u00e3o consult\u00e1vel neste ambiente",
+    "gpu_used": false
+  },
+  "timing_scope": "MFE + normalization + quantization; Invoke only; sum. Excludes WAV I/O, input tensor copy, USB, acquisition, OLED, audio playback and plotting.",
+  "comparison_limits": "PC NumPy FFT/vectorized frontend and LiteRT reference kernels versus original C++ frontend/TFLM on RP2040. Different implementations/environments. Historical board measurements, not simultaneous. No isolated hardware or quantization speedup claim.",
+  "board_session_sha256": "96621588212d3051c6f9ad561766956bd86ed4bf07ca46eccb7e83a21bc920a0",
+  "board_timings_sha256": "009d07ca903043c4b1c5b34006ba1720a8008bfe3a390f420610dc73dbc4037e",
+  "summary": {
+    "preprocessing": {
+      "pc": {
+        "median_ms": 0.2373,
+        "p95_ms": 0.37825499999999995,
+        "max_ms": 0.4935
+      },
+      "board": {
+        "median_ms": 1006.5450000000001,
+        "p95_ms": 1007.7791,
+        "max_ms": 1008.075
+      }
+    },
+    "inference": {
+      "pc": {
+        "median_ms": 2.42535,
+        "p95_ms": 2.98581,
+        "max_ms": 3.4256
+      },
+      "board": {
+        "median_ms": 311.8675,
+        "p95_ms": 311.8871,
+        "max_ms": 311.906
+      }
+    },
+    "processing": {
+      "pc": {
+        "median_ms": 2.6872499999999997,
+        "p95_ms": 3.284755,
+        "max_ms": 3.8259000000000003
+      },
+      "board": {
+        "median_ms": 1318.4205,
+        "p95_ms": 1319.64505,
+        "max_ms": 1319.943
+      }
+    }
+  },
+  "max_score_difference": 0.0,
+  "original_report_sha256": "00b87e0eed2e643a03dc976a95ffbd9eb5e87fd9698a718602223ad15e6c370f"
+}

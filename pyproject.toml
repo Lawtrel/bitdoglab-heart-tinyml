@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bitdoglab-heart-tinyml"
+version = "0.2.0"
+description = "Projeto de Introdução à Inteligência Artificial: TinyML cardíaco no RP2040"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = {text = "MIT"}
+authors = [{name = "Leandro Alves dos Santos"}]
+dependencies = ["numpy==2.0.2", "ai-edge-litert==2.3.0", "pyserial==3.5"]
+
+[project.optional-dependencies]
+research = ["scipy==1.15.3", "tensorflow==2.21.0"]
+research-gpu = ["scipy==1.15.3", "tensorflow[and-cuda]==2.21.0; sys_platform == 'linux'"]
+
+[project.scripts]
+heart-tinyml = "heart_tinyml.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Lawtrel/bitdoglab-heart-tinyml"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+heart_tinyml = ["resources/model/*", "resources/audio/*", "resources/evidence/*"]
+"heart_tinyml.web" = ["static/*.html", "static/*.css", "static/js/*.js"]

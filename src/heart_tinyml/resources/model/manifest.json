@@ -1,0 +1,42 @@
+{
+  "model_file": "model_int8.tflite",
+  "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+  "normalization_file": "normalization.json",
+  "normalization_sha256": "0435029adfa489e1f99b75852f5fc528919f409d7f5e36fbfd25461a6810566a",
+  "threshold": 0.7346754807692307,
+  "frontend": {
+    "dataset": "CirCor DigiScope 1.0.3",
+    "sample_rate": 4000,
+    "window_samples": 12000,
+    "hop_samples": 6000,
+    "fft_size": 128,
+    "frame_hop": 64,
+    "mel_bands": 24,
+    "low_hz": 30.0,
+    "high_hz": 1800.0,
+    "log_floor": 1e-06,
+    "std_floor": 1e-06,
+    "split_seed": 42,
+    "train_fraction": 0.7,
+    "validation_fraction": 0.15,
+    "test_fraction": 0.15,
+    "training_seeds": [
+      42,
+      43,
+      44
+    ],
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "epochs": 100,
+    "patience": 10,
+    "calibration_windows": 300,
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 2026,
+    "tensor_arena_bytes": 147456
+  },
+  "runtime": "LiteRT BUILTIN_REF, CPU, one thread",
+  "model_parameters": 1282,
+  "task": "Murmur Present versus Absent; no clinical diagnosis",
+  "normalization_source": "Training partition only; converted from frozen frontend_config.h without numerical re-estimation",
+  "upstream_frontend_header_sha256": "8e305d25d4a8169ec9fd8898c8c08494f95c89dd588cb93eca9c7254bd7f453e"
+}

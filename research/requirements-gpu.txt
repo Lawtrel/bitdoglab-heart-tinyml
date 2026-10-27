@@ -1,0 +1,5 @@
+# Ambiente Linux/WSL separado do ambiente Windows e da exportacao original.
+numpy==2.0.2
+scipy==1.15.3
+tensorflow[and-cuda]==2.21.0
+pyserial==3.5

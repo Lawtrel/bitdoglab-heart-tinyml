@@ -1,0 +1,49 @@
+
+:root {font: 17px/1.5 "Segoe UI", Arial, sans-serif; color: #173d46; background: #f2f5f3; --teal: #14766b; --muted: #576e71;}
+* {box-sizing: border-box;}
+body {margin: 0;}
+main {max-width: 1440px; margin: auto; padding: 32px 42px;}
+h1 {font-size: 42px; line-height: 1.15; letter-spacing: -1px; margin: 4px 0 14px;}
+h2 {font-size: 22px; margin: 10px 0 16px;}
+h3 {font-size: 18px; margin: 18px 0 8px;}
+p {margin: 10px 0 16px;}
+.eyebrow {color: var(--teal); font-weight: 700; font-size: 12px; letter-spacing: 2px;}
+nav {display: flex; gap: 12px; flex-wrap: wrap; padding: 14px 0 24px; border-bottom: 1px solid #cad7d2; margin-bottom: 25px;}
+button, .upload, select {font: 600 15px "Segoe UI", Arial, sans-serif; border: 1px solid #8da9a1; border-radius: 7px; padding: 12px 15px; color: #173d46; background: white; cursor: pointer;}
+button:hover, .upload:hover {background: #e3ede7;}
+button:disabled {opacity: .48; cursor: not-allowed;}
+button:focus-visible, summary:focus-visible, select:focus-visible, .upload:focus-within {outline: 3px solid #ddac58; outline-offset: 3px;}
+button.primary, .tab.active {background: var(--teal); color: white; border-color: var(--teal);}
+.workspace {display: grid; grid-template-columns: minmax(320px, .8fr) minmax(0, 1.5fr); gap: 28px;}
+.input-panel, .output-panel {background: white; border-radius: 12px; padding: 24px;}
+.actions {display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0;}
+.upload {display: inline-block;}
+.upload input {position: absolute; width: 1px; height: 1px; opacity: 0;}
+.input-panel h2:not(:first-child) {margin-top: 27px;}
+audio {display: block; width: 100%; margin: 14px 0;}
+details {margin-top: 16px;}
+summary {cursor: pointer; font-weight: 600;}
+details label {display: block; margin: 14px 0;}
+input[type=number] {width: 95px; padding: 7px; font: inherit; border: 1px solid #8da9a1; border-radius: 5px;}
+.small, .subtle, .axis {font-size: 13px; color: var(--muted);}
+.board-tools {border-top: 1px solid #d6e0da; margin-top: 26px; padding-top: 10px;}
+.predictions {display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0;}
+.prediction {border-left: 5px solid #b3c6bf; padding: 12px 15px; background: #f2f5f3;}
+.prediction span {font-size: 11px; font-weight: 700; letter-spacing: 1px;}
+.prediction strong {display: block; margin: 9px 0; font-size: 24px; line-height: 1.2;}
+.prediction p {font-size: 13px;}
+.prediction.present {border-color: #b14a3c;}
+.prediction.absent {border-color: var(--teal);}
+.prediction.experimental {border-color: #3479b1;}
+canvas {display: block; width: 100%; background: #102f39; border-radius: 6px;}
+#mfe {height: 160px; image-rendering: pixelated;}
+.axis {font-size: 12px; margin: 5px 0 15px;}
+#status {color: var(--teal); min-height: 24px;}
+#status.error {color: #a03830;}
+.notice {background: #fff5df; border-left: 4px solid #c69b39; padding: 15px 20px; margin-top: 24px; font-size: 14px;}
+table {border-collapse: collapse; width: 100%; margin: 22px 0; background: white; font-variant-numeric: tabular-nums;}
+th, td {padding: 15px 18px; text-align: left; border-bottom: 1px solid #d6e0da;}
+th {background: #173d46; color: white;}
+footer {font-size: 12px; color: var(--muted); margin-top: 30px;}
+@media(max-width: 950px) {.workspace {grid-template-columns: 1fr;} main {padding: 25px;} h1 {font-size: 34px;}}
+@media(max-width: 550px) {.predictions {grid-template-columns: 1fr;} main {padding: 18px;} table {font-size: 12px;} th, td {padding: 9px;}}

@@ -1,0 +1,1 @@
+"""adapters do aplicativo TinyML."""

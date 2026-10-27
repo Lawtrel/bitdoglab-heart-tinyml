@@ -1,0 +1,22 @@
+{
+  "origin": "CirCor DigiScope 1.0.3; same validation excerpts embedded in firmware",
+  "weak_group_labels_not_window_annotations": true,
+  "files": [
+    {
+      "file": "exemplo-1.wav",
+      "recording_id": "39043_AV",
+      "split": "validation",
+      "seconds": 3,
+      "pcm_sha256": "75aeefa5c84b70603b20790bf82a7513825e8db90a2a409347da28233f8325a5",
+      "group_label": 0
+    },
+    {
+      "file": "exemplo-2.wav",
+      "recording_id": "49627_AV",
+      "split": "validation",
+      "seconds": 3,
+      "pcm_sha256": "2d4cf1bffee04baba57da58c5d85eac75b1f4eb25a8b5dee330b04021914a663",
+      "group_label": 1
+    }
+  ]
+}

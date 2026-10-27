@@ -1,0 +1,45 @@
+# Ambientes e dependências locais
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+third_party/
+node_modules/
+
+# Dados, execuções e saídas locais
+data/
+runs/
+work/
+build/
+dist/
+*.uf2
+*.elf
+*.bin
+*.map
+*.su
+*.log
+*.lock
+!research/requirements*.txt
+
+# Credenciais e configuração da máquina
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+local-settings.json
+.DS_Store
+Thumbs.db
+
+# Temporários de LaTeX. Fontes, figuras, PPTX e PDF de apresentação permanecem versionados.
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
