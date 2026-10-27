@@ -35,10 +35,10 @@ Heart murmur classification on inexpensive microcontrollers requires joint asses
 \thispagestyle{firststyle}
 \slugnote
 \vspace{-13pt}
-\noindent\textbf{Research draft, 24 October 2026.} Host and full target-cohort replay tests are complete. Numerical feature differences, runtime peak RAM, and acoustic acquisition remain unresolved or unmeasured.
+\noindent\textbf{Research draft, 27 October 2026.} Host and full target-cohort replay tests are complete. Numerical feature differences, runtime peak RAM, and acoustic acquisition remain unresolved or unmeasured.
 
 \section{Introduction}
-Phonocardiograms (PCGs) represent heart sounds as sampled acoustic signals. Automated murmur classification has been investigated using annotated recordings from multiple auscultation locations \citep{oliveira2022circor,reyna2023challenge}. Murmur status and clinical outcome are distinct targets; an acoustic classifier must not equate a detected murmur with a disease diagnosis. This study addresses murmur presence only.
+Phonocardiograms (PCGs) represent heart sounds as sampled acoustic signals. Automated murmur classification has been investigated using annotated recordings from multiple auscultation locations \citep{oliveira2022circor,reyna2023challenge}. Murmur status and clinical outcome are distinct targets; an acoustic classifier must not equate a detected murmur with a disease diagnosis. This study addresses murmur presence only. A murmur is an additional sound associated with blood flow; innocent murmurs do not imply structural disease \citep{aha_murmurs}. The project was developed during an introductory artificial-intelligence course.
 
 Deploying such a classifier on a microcontroller requires more than a small model file. Waveform buffers, feature extraction, activations, runtime structures, and application code share limited resources. TensorFlow Lite for Microcontrollers (TFLM) supports embedded inference \citep{david2021tflm}, but application-level feasibility depends on the actual front-end and target implementation.
 
@@ -88,7 +88,13 @@ Test groups contributed one to nine recordings (median four). Test recording cou
 \subsection{Signal processing}
 The loader requires mono PCM16 audio and supports resampling when needed; all 2,976 retained recordings were already sampled at 4 kHz. Three-second windows (12,000 samples) use a 1.5-second hop. Short recordings are zero-padded; incomplete trailing windows in longer recordings are discarded. Each window has its direct-current (DC) component removed.
 
-The front-end uses a periodic 128-sample Hann window, 64-sample frame hop, unnormalized power spectrum, and 24 triangular mel filters spanning 30--1800 Hz. Positive-frequency bins are not doubled. Logarithmic mel-filterbank energies (MFE) are computed as $\log(\max(E,10^{-6}))$, producing a $186\times24$ array. Per-band normalization statistics are fitted only on training features and frozen. The embedded front-end remains floating point; INT8 refers to neural-network tensors. Python and C++ share frozen filter and normalization coefficients, padding, tensor layout, and quantization rounding rules; their observed numerical agreement is assessed separately.
+For each DC-centered waveform $x[n]$, the front-end uses a periodic Hann window $w[n]=0.5-0.5\cos(2\pi n/128)$ and a 64-sample frame hop. With an unnormalized DFT,
+\begin{align}
+X_t[k]&=\sum_{n=0}^{127}x[64t+n]w[n]e^{-j2\pi kn/128},\\
+E_{t,b}&=\sum_{k=0}^{64}H_b[k]|X_t[k]|^2,\\
+z_{t,b}&=\frac{\log(\max(E_{t,b},10^{-6}))-\mu_b}{\sigma_b}.
+\end{align}
+Here $H_b$ are 24 triangular mel filters over 30--1800 Hz; mel spacing uses $m(f)=2595\log_{10}(1+f/700)$. Positive-frequency power bins are not doubled. Means $\mu_b$ and standard deviations $\sigma_b$ use training features only. The number of frames is $1+\lfloor(12000-128)/64\rfloor=186$, yielding 4,464 normalized features. Shared frozen coefficients and layout do not ensure identical Python/C++ arithmetic; observed differences are reported below.
 
 
 Figure~\ref{fig:examples} illustrates two validation inputs and their spectral representations. The examples were selected by recording identifier within each class, independently of classifier output.
@@ -100,18 +106,23 @@ Figure~\ref{fig:examples} illustrates two validation inputs and their spectral r
 \end{figure*}
 
 \subsection{Network and offline training}
-The CNN contains two $3\times3$ convolutions with 8 and 16 channels, each followed by rectified linear unit (ReLU) activation and $2\times2$ max pooling, then global average pooling and a two-class softmax. Convolutions use same padding and unit stride; pooling uses valid padding and stride two. The model has 1,282 trainable parameters.
+The CNN contains two $3\times3$ convolutions with 8 and 16 channels, each followed by rectified linear unit (ReLU) activation and $2\times2$ max pooling, then global average pooling and a two-class softmax. Convolutions use same padding and unit stride; pooling uses valid padding and stride two. The model has 1,282 trainable parameters. Including biases, the layer counts are $(3\cdot3\cdot1+1)8=80$, $(3\cdot3\cdot8+1)16=1168$, and $(16+1)2=34$.
 
 Training used Adam with learning rate $10^{-3}$, batch size 32, and at most 100 epochs. Early stopping followed ten epochs without a strict improvement in validation patient-level F1. Weighted cross-entropy assigned each window weight proportional to $1/(N_c W_i)$, where $N_c$ is the number of training groups in its class and $W_i$ the group's training-window count; weights were normalized to mean one. No augmentation was used.
 
 Three initializations (seeds 42, 43, and 44) were trained. The highest validation F1 selected seed 43 at epoch 66. The three selected checkpoints had validation F1 of 0.451, 0.711, and 0.618, respectively. These are model-selection results, not repeated test trials. Training ran offline with TensorFlow 2.21 on an RTX 5050 under Arch Linux/WSL; Python, NumPy, and SciPy versions were 3.12.15, 2.0.2, and 1.15.3.
 
-Full-integer post-training quantization used 300 training windows for calibration. The converted graph contains convolution, max pooling, mean, fully connected, and softmax operators, with INT8 input and output. Tensor scales and zero points follow the converter specification \citep{int8spec}. The final serialized model is 5,264 bytes. This single compact architecture was evaluated without an architecture-search or ablation study; its size should not be interpreted as an optimized accuracy--resource frontier.
+Full-integer post-training quantization used 300 training windows for calibration. The converted graph contains convolution, max pooling, mean, fully connected, and softmax operators, with INT8 input and output. Tensor scales and zero points follow the converter specification \citep{int8spec}. For a normalized real value $z$, scale $s>0$, and zero point $z_0$, input conversion and reconstruction follow
+\begin{equation}
+q=\operatorname{clip}_{[-128,127]}(\operatorname{round}(z/s)+z_0),
+\quad \hat z=s(q-z_0).
+\end{equation}
+Rounding is half away from zero. Actual input $(s,z_0)$ is $(0.04310979694,-38)$; output is $(1/256,-128)$. Thus INT8 reduces tensor storage at the cost of rounding/saturation; biases and accumulation use INT32. The MFE front-end remains floating point. The 4,464-value input uses 4,464 INT8 bytes versus 17,856 Float32 bytes; this ratio is not a measured whole-firmware compression or speedup. The final serialized model is 5,264 bytes. This single compact architecture was evaluated without an architecture-search or ablation study; its size should not be interpreted as an optimized accuracy--resource frontier.
 
 \subsection{Target implementation}
 A C/C++ application embeds the frozen model and executes the MFE front-end and TFLM on the BitDogLab RP2040. The board target is \texttt{pico\_w}; measurements used core 0 at 133 MHz, with no wireless communication or core-1 workload. The RP2040 provides 264 KiB of on-chip SRAM \citep{rp2040docs}. Exact carrier revision was not independently recorded.
 
-Firmware used the Pico software development kit (SDK) commit \texttt{95ea6ac}, the Raspberry Pi TFLM port commit \texttt{dfea53b}, Arm GNU Toolchain 14.2.Rel1, CMake 3.31.6, and Ninja 1.11.1.4. Application compilation used \texttt{-O2}; TFLM used size optimization. Digital PCM16 waveforms were transferred over USB for controlled replay. The BitDogLab project documents microphone and OLED peripherals \citep{bitdoglab}. Microphone acquisition was not implemented, and the benchmark firmware did not drive the display.
+Firmware used the Pico software development kit (SDK) commit \texttt{95ea6ac}, the Raspberry Pi TFLM port commit \texttt{dfea53b}, Arm GNU Toolchain 14.2.Rel1, CMake 3.31.6, and Ninja 1.11.1.4. Application compilation used \texttt{-O2}; TFLM used size optimization. Digital PCM16 waveforms were transferred over USB for controlled replay. The BitDogLab project documents microphone and OLED peripherals \citep{bitdoglab}. Microphone acquisition was not part of the evaluated firmware, and the benchmark firmware did not drive the display.
 % TODO: registrar revisao fisica e medir custos da interface em protocolo separado.
 
 % Demo visual separada: firmware-demo e scripts proprios. Nao atribuir seus custos ao benchmark original.
@@ -120,7 +131,7 @@ A separate OLED/RGB demonstrator was subsequently built with two stored validati
 
 \section{Experimental Setup}
 \subsection{Aggregation and host evaluation}
-Window positive-class probabilities are averaged per recording; the patient-group score is the maximum recording score over available locations. A validation threshold maximizes patient F1, breaking ties by higher recall and then lower threshold. The float and INT8 thresholds are 0.725111204844 and 0.734675480769, respectively. The latter is frozen for target testing. Record count and location coverage may affect maximum-score aggregation.
+Window positive-class probabilities are averaged per recording; the patient-group score is the maximum recording score over available locations. A validation threshold maximizes patient F1, breaking ties by higher recall and then lower threshold. The float and INT8 thresholds are 0.725111204844 and 0.734675480769, respectively. The latter is frozen for target testing. Writing window scores as $p_{i,r,t}$ gives $\bar p_{i,r}=T_{i,r}^{-1}\sum_t p_{i,r,t}$ and $s_i=\max_r\bar p_{i,r}$; prediction is $\hat y_i=\mathbb{1}[s_i\ge\tau]$. Record count and location coverage may affect maximum-score aggregation.
 
 Host testing uses the same 122 held-out groups for a training-majority baseline, float CNN, and INT8 CNN. The original INT8 host evaluation used the AUTO/XNNPACK interpreter. The primary measure is binary patient-level F1, with murmur present positive:
 \begin{equation}
@@ -236,12 +247,26 @@ Combined & 1,318.405 & 1,319.889 & 1,323.475\\
 % TODO: medir pico de RAM e watermark da pilha com instrumentacao no hardware.
 % Resultados completos conferidos com o diario e os relatórios congelados.
 
+\subsection{Supplementary CPU/GPU and quantization benchmark}
+A separate session on 27 October replayed the same 100 validation windows used by the earlier benchmark, with ten excluded warm-up calls and three fixed-order shuffled repetitions (batch size one). CPU and RTX Float32 used TensorFlow 2.21; the timed graph call included synchronized output readback but excluded input-tensor creation/upload. MFE remained on the CPU. Float32/INT8 CPU comparison used TFLite 2.21 \texttt{BUILTIN\_REF}, one thread, with Invoke timing. RP2040 measurements used the separately audited V3 demonstrator at 133 MHz, whose resources must not be substituted for Table~\ref{tab:resources}.
+\begin{table}[t]\centering
+\caption{Supplementary validation benchmark: 300 calls per mode, median milliseconds. TF: synchronized graph call; ref.: reference Invoke.}\label{tab:fresh}
+\begin{tabular}{lrr}\toprule
+Execution & Inference & MFE + network\\\midrule
+CPU Float32 (TF) & 0.661 & 0.836\\
+RTX Float32 (TF) & 0.768 & 0.956\\
+CPU Float32 (ref.) & 1.347 & 1.509\\
+CPU INT8 (ref.) & 1.932 & 2.113\\
+RP2040 INT8 (V3) & 312.077 & 1,322.608\\\bottomrule
+\end{tabular}\end{table}
+The Float32 TFLite export occupied 7,984 bytes versus 5,264 INT8 bytes (34.1\% reduction); conversion matched CPU model outputs within $4.77\times10^{-7}$ over these inputs. INT8 did not reduce reference-CPU latency. Float32/INT8 mean absolute window-score difference was 0.01454; two of 100 decisions differed at the common INT8 threshold. These are window diagnostics, not patient accuracy. Target and CPU INT8 scores matched on these 100 windows. The RTX did not reduce single-window latency in this session; dispatch/readback overhead is a possible explanation, not an isolated finding. Repeated correlated windows, fixed mode order, and different runtime timing scopes limit hardware-only interpretation. No training, threshold tuning, or replacement of the held-out test results occurred.
+
 \subsection{Reproducibility and remaining evidence}
-The retained artifacts include the inventory and grouped split manifest, training histories, export receipt, original host predictions, linked-firmware audit, and target USB journals. The deployed model has SHA256 prefix \texttt{3b7e258e26ca}; the full digest and source-file hashes are recorded in the receipts. These artifacts are retained locally; a public code archive has not been released. No new participant recordings were acquired in this study.
+The retained artifacts include the inventory and grouped split manifest, training histories, export receipt, original host predictions, linked-firmware audit, and target USB journals. The deployed model has SHA256 prefix \texttt{3b7e258e26ca}; the full digest and source-file hashes are recorded in the receipts. Raw journals are retained locally; code, curated evidence, and teaching materials are available at \url{https://github.com/Lawtrel/bitdoglab-heart-tinyml}. No new participant recordings were acquired in this study.
 
 The original host evaluation, validation benchmark, and completed target test are fixed evidence sets. Resuming the target protocol preserved weights, thresholds, sample order, and comparison tolerances. Additional acoustic, numerical-diagnostic, or memory experiments require separate recorded configurations and cannot be inferred from the existing digital replay. No test-based changes to the model, aggregation, or decision threshold were made.
-% TODO: disponibilizar codigo e protocolo com versao/licenca, sem publicar dados pessoais.
-% TODO: inserir link publico real somente depois da publicacao autorizada do repositorio.
+% Codigo publico sob MIT; dados/fontes de terceiros mantem licencas proprias. Novos benchmarks de validation devem ficar separados do teste original.
+% TODO: incorporar novo benchmark CPU/RTX/placa somente apos conclusao e auditoria; nao antecipar numeros.
 
 \section{Conclusion}
 A 1,282-parameter CNN quantized to a 5,264-byte model achieved patient-level F1 of 0.694, recall of 0.708, and accuracy of 0.877 during complete held-out replay on a BitDogLab RP2040. Target and reference-host decisions agreed for all 122 groups; feature and output differences nevertheless prevent a claim of bit-exact equivalence. Median combined processing was 1.318 seconds over 6,512 test windows, supporting controlled replay feasibility. Wide predictive uncertainty, unresolved front-end differences, unmeasured peak RAM, and the absence of acoustic and streaming validation limit the result. Further work should address these limitations with separately recorded experiments rather than retuning on this test set.

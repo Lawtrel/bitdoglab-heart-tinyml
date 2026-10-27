@@ -36,3 +36,26 @@ export function drawMfe(canvas, matrix) {
       Math.ceil(canvas.width / band.length), Math.ceil(canvas.height / matrix.length));
   }));
 }
+
+export function drawBars(canvas, categories, values, unit) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#f4f6f3'; ctx.fillRect(0, 0, w, h);
+  const left = 95, top = 40, bottom = h - 55, usable = bottom - top;
+  const maximum = Math.max(...values) * 1.25;
+  ctx.font = '20px Arial'; ctx.fillStyle = '#173d46'; ctx.fillText(unit, 14, 27);
+  for (let i = 0; i <= 4; i++) {
+    const value = maximum * i / 4, y = bottom - usable * i / 4;
+    ctx.strokeStyle = '#cedbd5'; ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(w - 25, y); ctx.stroke();
+    ctx.fillStyle = '#536b70'; ctx.fillText(value.toLocaleString('pt-BR', {maximumFractionDigits: 3}), 10, y + 6);
+  }
+  const span = (w - left - 30) / values.length;
+  values.forEach((value, i) => {
+    const x = left + span * i + span * .22, barW = span * .56, barH = usable * value / maximum;
+    ctx.fillStyle = i ? '#b34c3e' : '#14766b'; ctx.fillRect(x, bottom - barH, barW, barH);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#173d46';
+    ctx.fillText(value.toLocaleString('pt-BR', {maximumFractionDigits: 3}), x + barW / 2, bottom - barH - 12);
+    ctx.fillText(categories[i], x + barW / 2, h - 20); ctx.textAlign = 'left';
+  });
+}

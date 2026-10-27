@@ -4,7 +4,7 @@ Projeto desenvolvido por **Leandro Alves dos Santos durante as aulas de Introdu�
 
 O repositório reúne uma demonstração didática, firmware e o pipeline de pesquisa usado no artigo em desenvolvimento para o SBMSB. “Sopro presente/ausente” é uma classificação do modelo, não um diagnóstico nem um detector genérico de batimentos. O modo de microfone é experimental.
 
-[Início rápido](docs/quickstart.md) · [Arquitetura e padrões](docs/architecture.md) · [Firmware](docs/firmware.md) · [Pesquisa e resultados](docs/results.md) · [Apresentação](docs/presentation/README.md) · [English](README.en.md)
+[Início rápido](docs/quickstart.md) · [Matemática e INT8](docs/mathematics.md) · [Arquitetura e padrões](docs/architecture.md) · [Firmware](docs/firmware.md) · [Pesquisa e resultados](docs/results.md) · [Apresentação](docs/presentation/README.md) · [English](README.en.md)
 
 ## Executar no computador
 
@@ -40,7 +40,7 @@ No Windows, você também pode usar **SETUP_WINDOWS.cmd** uma vez e **START_WIND
 
 No painel:
 
-1. Escolha **Áudio 1** ou **Áudio 2** e ouça o trecho.
+1. Escolha um dos **seis exemplos de validation** e ouça o trecho.
 2. Clique em **Analisar no PC** para ver a onda, o MFE e a previsão.
 3. Opcionalmente conecte uma placa com o firmware `demo` e use **Comparar o mesmo áudio por USB**.
 
@@ -72,13 +72,21 @@ Os padrões aplicados são **Ports and Adapters**, **injeção de dependências*
 | Teste digital completo no RP2040 | 6.512 janelas, 471 gravações, 122 grupos |
 | Modelo embarcado | INT8, 5.264 bytes, limiar congelado |
 | Demonstração A da V2 | Funcionamento confirmado manualmente pelo autor |
-| Demo V3 original | Compilada e auditada; confirmação física por USB pendente nos registros |
+| Demo V3 original | USB confirmada em 300 chamadas do benchmark de 27/10/2026 |
 | Novo layout CMake deste repositório | Fontes reorganizadas; precisa de novo build antes de gravar |
 | Microfone / uso clínico / streaming contínuo | Não validados |
 
 Na placa, o teste por grupo apresentou F1 **0,694**, recall **70,8%** e acurácia **87,7%**. Foram identificados 17 de 24 positivos, com sete falsos negativos. O IC95% de F1 foi 0,526–0,829. Esses números não descrevem a precisão do microfone nem a classificação de um único trecho demonstrado.
 
 Os dados e critérios completos estão em [docs/results.md](docs/results.md). As métricas históricas não foram recalculadas ou ajustadas durante a organização do código.
+
+## O que o novo benchmark mostrou
+
+O training usou **2.066 recordings de 568 grupos**, formando **28.340 windows**. Os seis áudios do painel são apenas exemplos de validation.
+
+Em 27/10/2026, CPU/RTX Float32 e CPU Float32/INT8 reference foram medidos nas mesmas 100 validation windows × 3 repetições, com batch size 1. A mediana de inference foi 0,661 ms na CPU e 0,768 ms na RTX; no reference resolver de CPU, Float32 levou 1,347 ms e INT8 1,932 ms. A demo V3 do RP2040 levou 312,077 ms de inference e 1.322,608 ms de MFE + network.
+
+O TFLite Float32 ocupa 7.984 bytes e o INT8 5.264: **34,1% menor**. Houve duas decisões de window diferentes entre Float32/INT8 no mesmo threshold. CPU INT8 e placa preservaram os scores nas cem windows. Essas comparações não são patient accuracy nem provam speedup universal: [protocolo e limites](docs/new-benchmark.md).
 
 ## Testes
 

@@ -16,6 +16,10 @@ class ApiController:
             except OSError:
                 ports, warning = [], "Portas USB indisponíveis. O modo PC continua disponível."
             return {"provenance": provenance(), "ports": ports, "warning": warning}
+        if path == "/api/fresh-benchmark":
+            return self.app.evidence.fresh_benchmark()
+        if path == "/api/examples":
+            return self.app.evidence.catalog()
         if path == "/api/results":
             return self.app.evidence.classification()
         if path == "/api/benchmark":

@@ -8,7 +8,7 @@ import numpy as np
 from heart_tinyml.config import AppConfig
 from heart_tinyml.adapters.audio import WavDecoder
 from heart_tinyml.adapters.inference import LiteRTPredictor
-from heart_tinyml.adapters.repositories import FrozenModelRepository
+from heart_tinyml.adapters.repositories import FrozenModelRepository, EvidenceRepository
 from heart_tinyml.domain.errors import InputError, IntegrityError
 
 class ModelAndAudioTests(unittest.TestCase):
@@ -79,3 +79,16 @@ class ModelAndAudioTests(unittest.TestCase):
                     path.write_bytes(path.read_bytes() + b"changed")
                 with self.assertRaises(IntegrityError):
                     FrozenModelRepository(folder).load()
+
+    def test_six_catalogued_examples_are_intact_and_reproducible(self):
+        evidence = EvidenceRepository(self.assets)
+        catalog = evidence.catalog()
+        self.assertEqual(len(catalog["examples"]), 6)
+        self.assertEqual({item["split"] for item in catalog["examples"]}, {"validation"})
+        self.assertEqual(len({item["patient_group"] for item in catalog["examples"]}), 6)
+        for item in catalog["examples"]:
+            raw = evidence.sample(item["number"])
+            output = self.predictor.predict(self.decoder.decode(raw))
+            self.assertEqual(output.score, item["reference_score"])
+        with self.assertRaises(FileNotFoundError):
+            evidence.sample(99)

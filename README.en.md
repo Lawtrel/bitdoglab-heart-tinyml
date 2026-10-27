@@ -25,3 +25,9 @@ python -m unittest discover -s tests -v
 ```
 
 Project code is MIT licensed. Audio and other third-party resources retain their respective licenses and attribution requirements. See [third-party notices](THIRD_PARTY_NOTICES.md).
+
+## Updated teaching material and benchmark (27 October 2026)
+
+The training cohort contained 2,066 recordings from 568 groups (28,340 windows). The six validation excerpts in the demo were not the training dataset. The Portuguese teaching package now contains 28 editable slides, a visual PDF, speaker notes and a ten-page mathematical guide. Technical terms remain in English.
+
+The new batch-one validation benchmark separates TensorFlow CPU/RTX Float32 from TFLite reference CPU Float32/INT8 and the V3 RP2040 demonstration. CPU/RTX medians were 0.661/0.768 ms, while CPU reference Float32/INT8 medians were 1.347/1.932 ms. Float32/INT8 TFLite files occupy 7,984/5,264 bytes (34.1% reduction). These are scoped measurements from one session, not an isolated universal speedup claim or new patient-level test accuracy. See [protocol and evidence](docs/new-benchmark.md).

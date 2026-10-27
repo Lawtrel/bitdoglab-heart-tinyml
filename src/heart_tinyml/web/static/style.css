@@ -47,3 +47,9 @@ th {background: #173d46; color: white;}
 footer {font-size: 12px; color: var(--muted); margin-top: 30px;}
 @media(max-width: 950px) {.workspace {grid-template-columns: 1fr;} main {padding: 25px;} h1 {font-size: 34px;}}
 @media(max-width: 550px) {.predictions {grid-template-columns: 1fr;} main {padding: 18px;} table {font-size: 12px;} th, td {padding: 9px;}}
+
+#learning {max-width: 980px;}
+#learning p, .lesson-steps li {line-height: 1.75;}
+.lesson-steps li {margin: 12px 0;}
+.equation {font-family: "Consolas", monospace; background: white; padding: 18px; border-left: 4px solid #14766b; overflow-wrap: anywhere;}
+#sample-choice {max-width: 100%;}

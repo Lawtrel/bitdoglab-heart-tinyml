@@ -1,0 +1,67 @@
+{
+  "status": "complete",
+  "kind": "fresh_validation_compute_benchmark_not_test_accuracy",
+  "mode": "cpu_float_lite",
+  "fingerprint": "07dac7baaf4e6db03188b635f805d2e89411495bdb8d01bc3e991289e904fd87",
+  "started_utc": "2026-10-27T14:17:04.152662+00:00",
+  "plan_sha256": "f2d1ec57ad19ceb93a2836ae23a6cd8c9e1db519076cd85e149618f35394fcba",
+  "script_sha256": "ff34a892d07a102e2ce2287ffbfbf8f7c141b6aaa3959a6367e64aced8803aa2",
+  "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+  "float_model_sha256": "0adfd1f85827153d8b2daac57467424394890b4b7b748c9e24e96bac6638ae1f",
+  "windows": 100,
+  "repetitions": 3,
+  "warmup_calls_per_session": 10,
+  "batch_size": 1,
+  "host": {
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.44",
+    "python": "3.12.15",
+    "numpy": "2.0.2"
+  },
+  "completed_calls": 300,
+  "threshold_int8": 0.7346754807692307,
+  "threshold_float": 0.7251112048442547,
+  "limits": "Validation windows are correlated; do not interpret 300 calls as 300 patients. TF graph dispatch/readback differs from LiteRT Invoke and TFLM Invoke. No energy, peak RAM or isolated quantization speedup measured.",
+  "float_tflite_sha256": "951225a2d234ca578de6f01eb4f852cfcac4fc9803070a85cda92de95d5d904f",
+  "float_tflite_bytes": 7984,
+  "int8_tflite_bytes": 5264,
+  "runtime": {
+    "engine": "TensorFlow Lite",
+    "version": "2.21.0",
+    "resolver": "BUILTIN_REF",
+    "threads": 1,
+    "device": "CPU",
+    "precision": "Float32"
+  },
+  "conversion_check": {
+    "partition": "validation",
+    "windows": 100,
+    "maximum_absolute_error": 4.76837158203125e-07,
+    "atol": 1e-05,
+    "rtol": 1e-05,
+    "threshold_tuned": false
+  },
+  "timing_scope": "CPU MFE + normalization + INT8 input quantization when used; reference Invoke only. Input tensor copy, score readout, WAV I/O and plotting excluded.",
+  "runtime_initialized_utc": "2026-10-27T14:17:07.030809+00:00",
+  "ended_utc": "2026-10-27T14:17:07.537999+00:00",
+  "rows_sha256": "d024d862648a52ae43aeaa8b46e00f69abf324a9cbd314118c903dcf7044d22e",
+  "summary": {
+    "preprocessing_ms": {
+      "median_ms": 0.15586299999999997,
+      "p95_ms": 0.24978505000000006,
+      "min_ms": 0.144069,
+      "max_ms": 1.176587
+    },
+    "inference_ms": {
+      "median_ms": 1.3472754999999998,
+      "p95_ms": 1.6546794999999999,
+      "min_ms": 1.306786,
+      "max_ms": 7.237222
+    },
+    "processing_ms": {
+      "median_ms": 1.509434,
+      "p95_ms": 1.8717085,
+      "min_ms": 1.456514,
+      "max_ms": 8.413809
+    }
+  }
+}

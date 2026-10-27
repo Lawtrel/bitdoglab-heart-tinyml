@@ -56,7 +56,19 @@ class EvidenceRepository:
     def benchmark(self) -> dict:
         return read_json(self.assets / "evidence/benchmark.json")
 
+    def fresh_benchmark(self) -> dict:
+        return read_json(self.assets / "evidence/fresh_benchmark.json")
+
+    def catalog(self) -> dict:
+        return read_json(self.assets / "audio/catalog.json")
+
     def sample(self, number: int) -> bytes:
-        if number not in (1, 2):
+        examples = self.catalog()["examples"]
+        sample = next((item for item in examples if item["number"] == number), None)
+        if sample is None:
             raise FileNotFoundError("Exemplo inexistente")
-        return (self.assets / "audio" / f"exemplo-{number}.wav").read_bytes()
+        # O nome e construido a partir do numero validado, nunca do pedido HTTP.
+        blob = (self.assets / "audio" / f"exemplo-{number}.wav").read_bytes()
+        if hashlib.sha256(blob).hexdigest() != sample["wav_sha256"]:
+            raise IntegrityError("O audio de exemplo mudou. Restaure o arquivo original.")
+        return blob

@@ -16,6 +16,7 @@
   </header>
   <nav aria-label="Conteúdo">
     <button class="tab active" data-pane="demo">Demonstração</button>
+    <button class="tab" data-pane="learning">Como fiz o projeto</button>
     <button class="tab" data-pane="results">Resultados do estudo</button>
     <button class="tab" data-pane="timing">Comparação de tempo</button>
   </nav>
@@ -24,10 +25,11 @@
       <section class="input-panel">
         <h2>1. Escolha e ouça um áudio</h2>
         <div class="actions">
-          <button class="sample" data-sample="1">Áudio 1</button>
-          <button class="sample" data-sample="2">Áudio 2</button>
+          <select id="sample-choice" aria-label="Exemplo de áudio"><option value="">Carregando exemplos…</option></select>
+          <button id="load-sample">Carregar exemplo</button>
           <label class="upload">Abrir WAV<input id="file" type="file" accept=".wav,audio/wav"></label>
         </div>
+        <p class="small">Seis trechos reais de validation. O rótulo do grupo não garante que o sopro seja audível nestes 3 segundos.</p>
         <p id="filename" class="subtle">Escolha um dos exemplos para começar.</p>
         <audio id="player" controls></audio>
         <details>
@@ -73,6 +75,30 @@
     </div>
     <p class="notice">“Sem sopro” é uma previsão para este trecho. A rede não identifica doenças e pode atribuir uma classe até para fala ou ruído. Os exemplos ilustram o funcionamento; as métricas do estudo são calculadas por grupo.</p>
   </section>
+  <section id="learning" class="pane" hidden>
+    <h2>O que significa “com sopro” e “sem sopro”?</h2>
+    <p>Um <strong>heart murmur</strong> é um som adicional associado ao fluxo de sangue. Ele pode ser inocente ou acompanhar uma alteração cardíaca. “Sem sopro” não significa ausência de doença. Neste projeto são rótulos de uma tarefa de classificação, não diagnósticos.</p>
+    <p>A rede usa sempre as duas classes aprendidas: até fala ou ruído podem receber uma delas. O exemplo do painel é uma janela; os resultados científicos usam várias janelas e locais por grupo.</p>
+    <h2>Como o áudio chegou à rede</h2>
+    <ol class="lesson-steps">
+      <li><strong>Sampling:</strong> 3 s × 4.000 samples/s = 12.000 samples. O WAV PCM16 ocupa 24.000 bytes de sinal.</li>
+      <li><strong>Framing:</strong> janelas Hann de 128 samples, frame hop de 64. floor((12.000 − 128)/64) + 1 = 186 frames.</li>
+      <li><strong>Feature extraction:</strong> FFT → power spectrum → 24 Mel filters → log-energy. A entrada tem 186 × 24 = 4.464 valores.</li>
+      <li><strong>Normalization:</strong> z = (log-energy − mean) / standard deviation. As estatísticas vieram só de training.</li>
+      <li><strong>Inference:</strong> duas Conv2D, MaxPool, Global Average Pooling e Softmax. São 1.282 parâmetros aprendidos.</li>
+    </ol>
+    <h2>Por que usei INT8?</h2>
+    <p>Float32 usa 32 bits por valor. INT8 usa um inteiro com sinal de 8 bits, de −128 a 127. Isso reduz o armazenamento de pesos e activations e permite integer kernels. O custo é arredondar valores e, às vezes, saturá-los. Os bias e accumulators podem usar INT32; o MFE deste projeto continua em floating point.</p>
+    <p class="equation">q = clip(round(z / scale) + zero-point, −128, 127)<br>z reconstruído = (q − zero-point) × scale</p>
+    <p>Neste modelo: input scale = 0,04310979694 e zero-point = −38. Para z = 1, q = −15 e z reconstruído ≈ 0,9915. Um tensor de input ocupa 4.464 bytes em INT8 ou 17.856 em Float32. O arquivo completo tem 5.264 bytes e inclui metadados: não é uma redução total medida de quatro vezes.</p>
+    <h2>Por que PC e placa podem dar a mesma resposta?</h2>
+    <p>O mesmo modelo pode chegar à mesma classe em máquinas diferentes. Isso é desejável. A comparação mostra quanto tempo e memória cada implementação exige. A RTX foi usada no <strong>training</strong>; os tempos históricos do PC são de <strong>CPU inference</strong>. O novo benchmark mediu RTX inference separadamente: 0,768 ms de mediana, contra 0,661 ms da CPU nesta sessão com batch size 1. Veja a aba Comparação de tempo.</p>
+    <h2>Como calculei as métricas da placa</h2>
+    <p>17 true positives, 7 false negatives, 8 false positives e 90 true negatives:</p>
+    <p class="equation">Precision = 17 / (17 + 8) = 68,0%<br>Recall = 17 / (17 + 7) = 70,8%<br>F1 = 34 / (34 + 8 + 7) ≈ 0,694<br>Accuracy = (17 + 90) / 122 ≈ 87,7%</p>
+    <p>As scores são médias por recording e depois o máximo entre recordings do grupo. O threshold INT8, 0,734675480769, foi escolhido em validation, sem ajuste no test set. Os exemplos extras não mudaram esse threshold.</p>
+    <p class="small">Fontes: CirCor DigiScope 1.0.3 (PhysioNet), LiteRT 8-bit quantization specification e American Heart Association, Heart Murmurs. O guia e os slides trazem referências e contas completas.</p>
+  </section>
   <section id="results" class="pane" hidden>
     <h2>Teste científico concluído</h2>
     <p>6.512 janelas, 471 gravações e 122 grupos. Estes números pertencem ao firmware científico e são separados dos testes do microfone.</p>
@@ -83,7 +109,15 @@
     <p class="small">A placa e o PC de referência coincidiram nas decisões dos 122 grupos. Houve diferenças numéricas em features/escores e uma decisão diferente em relação ao PC otimizado. Não há equivalência bit a bit do processamento completo.</p>
   </section>
   <section id="timing" class="pane" hidden>
-    <h2>Tempo para processar uma janela de 3 segundos</h2>
+    <h2>Novo benchmark: CPU, RTX e BitDogLab</h2>
+    <p>Medido em 27/10/2026. As mesmas 100 validation windows, 10 warm-up calls excluídas e 3 repetições; batch size 1. São chamadas repetidas, não 300 pacientes.</p>
+    <div id="fresh-table"></div>
+    <canvas id="gpu-chart" width="1000" height="340" aria-label="Inference Float32 em CPU e RTX, mediana em milissegundos"></canvas>
+    <p id="fresh-explanation"></p>
+    <h3>Tamanho do arquivo TFLite</h3>
+    <canvas id="size-chart" width="1000" height="340" aria-label="Tamanho dos modelos TFLite Float32 e INT8 em bytes"></canvas>
+    <p class="notice">CPU/RTX Float32: TensorFlow graph call e output readback sincronizado. CPU Float32/INT8 reference: TFLite Invoke, uma thread. Placa: timestamps do firmware demo V3 a 133 MHz. O MFE da RTX roda na CPU. Ordem fixa dos modos e escopos distintos limitam conclusões isoladas sobre hardware.</p>
+    <h2>Comparação histórica: mesmas 100 windows</h2>
     <p>As mesmas 100 janelas de validação, com o mesmo modelo. CPU com uma thread no PC; medidas históricas do firmware científico a 133 MHz na placa.</p>
     <div id="timing-table"></div>
     <p class="notice">A comparação inclui implementações diferentes: MFE NumPy e LiteRT no PC, C++ e TFLite Micro na placa. Exclui aquisição, arquivos, USB, OLED e reprodução. Não usa a RTX e não mede isoladamente o efeito da quantização.</p>

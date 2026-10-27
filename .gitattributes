@@ -15,3 +15,7 @@
 
 # Preserve exact bytes covered by the frozen normalization SHA256.
 src/heart_tinyml/resources/model/normalization.json -text
+
+# Preserve audited benchmark records byte for byte.
+docs/evidence/validation-benchmark-20261027/*.json -text
+docs/evidence/validation-benchmark-20261027/*.jsonl -text

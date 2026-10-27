@@ -5,6 +5,7 @@ import json
 import logging
 import mimetypes
 import secrets
+import re
 from urllib.parse import urlparse
 from ..domain.errors import BoardError, InputError, IntegrityError
 from .controller import ApiController
@@ -57,8 +58,9 @@ def make_handler(controller: ApiController, token: str, port: int, max_body: int
             try:
                 if path.startswith("/api/"):
                     return self.reply(controller.get(path))
-                if path in ("/audio/1.wav", "/audio/2.wav"):
-                    return self.reply(controller.app.evidence.sample(int(path[-5])), mime="audio/wav")
+                match = re.fullmatch(r"/audio/([1-9][0-9]?)\.wav", path)
+                if match:
+                    return self.reply(controller.app.evidence.sample(int(match.group(1))), mime="audio/wav")
                 route = "index.html" if path == "/" else path.lstrip("/")
                 allowed = {"index.html", "style.css", "js/app.js", "js/api.js", "js/plots.js", "js/views.js"}
                 if route not in allowed:

@@ -39,7 +39,13 @@ A reorganização do aplicativo não repetiu nem substituiu esses benchmarks. Os
 
 Modelo: 5.264 bytes. Imagem flash: 189.408 bytes. Espaço estático principal de SRAM: 186.224 bytes. Arena já incluída na reserva, sem soma dupla. Pico de RAM e watermark de pilha desconhecidos.
 
-Demo V3 histórica: imagem flash 255.512 bytes; compilada e auditada, confirmação física USB pendente nos registros. O novo layout CMake exige build novo. Os recursos da demonstração não substituem os do firmware científico.
+Demo V3: imagem flash 255.512 bytes; compilada e auditada, com execução USB confirmada no novo benchmark de 27/10/2026 (300 chamadas após warm-up). O novo layout CMake exige build novo. Os recursos da demonstração não substituem os do firmware científico.
+
+## Novo benchmark suplementar (27/10/2026)
+
+As mesmas 100 validation windows foram medidas três vezes, com batch size 1 e dez warm-up calls por modo. Medianas de inference: TensorFlow CPU Float32 0,661 ms, RTX Float32 0,768 ms, CPU TFLite reference Float32 1,347 ms, CPU TFLite reference INT8 1,932 ms e RP2040 INT8 312,077 ms. Os escopos e runtimes diferem; os resultados não isolam o efeito de hardware ou quantization.
+
+O TFLite Float32 tem 7.984 bytes e o INT8 5.264 bytes: redução de 34,1%. Não houve novo training nem ajuste de threshold. Consulte o [protocolo e limitações](new-benchmark.md) e a [evidência publicável](evidence/validation-benchmark-20261027/summary.json). As métricas do test set acima permanecem históricas e separadas deste benchmark de validation.
 
 ## Proveniência publicável
 

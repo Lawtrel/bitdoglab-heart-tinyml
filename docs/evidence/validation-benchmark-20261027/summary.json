@@ -1,0 +1,221 @@
+{
+  "status": "audited_complete",
+  "date": "2026-10-27",
+  "kind": "supplementary_validation_benchmark",
+  "windows": 100,
+  "repetitions": 3,
+  "calls_per_mode": 300,
+  "warmup_calls_per_mode": 10,
+  "batch_size": 1,
+  "plan_sha256": "f2d1ec57ad19ceb93a2836ae23a6cd8c9e1db519076cd85e149618f35394fcba",
+  "script_sha256": "ff34a892d07a102e2ce2287ffbfbf8f7c141b6aaa3959a6367e64aced8803aa2",
+  "modes": {
+    "cpu_float": {
+      "runtime": {
+        "tensorflow": "2.21.0",
+        "device": "/CPU:0",
+        "tf32": false,
+        "intra_threads": 1,
+        "inter_threads": 1,
+        "gpus": [
+          "NVIDIA GeForce RTX 5050"
+        ]
+      },
+      "summary": {
+        "preprocessing_ms": {
+          "median_ms": 0.176263,
+          "p95_ms": 0.21573055000000002,
+          "min_ms": 0.150198,
+          "max_ms": 0.356976
+        },
+        "inference_ms": {
+          "median_ms": 0.660848,
+          "p95_ms": 0.82342725,
+          "min_ms": 0.557944,
+          "max_ms": 1.327696
+        },
+        "processing_ms": {
+          "median_ms": 0.8361685,
+          "p95_ms": 1.0186801,
+          "min_ms": 0.709022,
+          "max_ms": 1.560313
+        }
+      },
+      "timing_scope": "CPU MFE and normalization; tf.function call plus synchronized output.numpy readback. Input tensor creation/upload excluded from inference_ms but included in including_tensor_transfer_ms. No WAV I/O, plotting or training.",
+      "source_report_sha256": "6039e5a22f6af33d48f1efab864fd07a27f13c98966093eaccd0d53397052b74",
+      "rows_sha256": "0540c0562d1f8debb391ad29850e2dbf70a9617d0f5e13bd50026f279cf9ca84"
+    },
+    "gpu_float": {
+      "runtime": {
+        "tensorflow": "2.21.0",
+        "device": "/GPU:0",
+        "tf32": false,
+        "intra_threads": 1,
+        "inter_threads": 1,
+        "gpus": [
+          "NVIDIA GeForce RTX 5050"
+        ]
+      },
+      "summary": {
+        "preprocessing_ms": {
+          "median_ms": 0.171753,
+          "p95_ms": 0.23774800000000001,
+          "min_ms": 0.152158,
+          "max_ms": 0.514754
+        },
+        "inference_ms": {
+          "median_ms": 0.768254,
+          "p95_ms": 1.73418555,
+          "min_ms": 0.645032,
+          "max_ms": 2.488503
+        },
+        "processing_ms": {
+          "median_ms": 0.9562165,
+          "p95_ms": 1.9130882500000002,
+          "min_ms": 0.799601,
+          "max_ms": 2.727391
+        }
+      },
+      "timing_scope": "CPU MFE and normalization; tf.function call plus synchronized output.numpy readback. Input tensor creation/upload excluded from inference_ms but included in including_tensor_transfer_ms. No WAV I/O, plotting or training.",
+      "source_report_sha256": "b59ab8085e7997a7becbd442e2db13041ed1cc6af2a87f1bfbf75bb7fb7ac3a8",
+      "rows_sha256": "328cf788727c75c3c5bb00fb6e1c5691fe363dc770e45cd0c4002a72c404ab07"
+    },
+    "cpu_float_lite": {
+      "runtime": {
+        "engine": "TensorFlow Lite",
+        "version": "2.21.0",
+        "resolver": "BUILTIN_REF",
+        "threads": 1,
+        "device": "CPU",
+        "precision": "Float32"
+      },
+      "summary": {
+        "preprocessing_ms": {
+          "median_ms": 0.15586299999999997,
+          "p95_ms": 0.24978505000000006,
+          "min_ms": 0.144069,
+          "max_ms": 1.176587
+        },
+        "inference_ms": {
+          "median_ms": 1.3472754999999998,
+          "p95_ms": 1.6546794999999999,
+          "min_ms": 1.306786,
+          "max_ms": 7.237222
+        },
+        "processing_ms": {
+          "median_ms": 1.509434,
+          "p95_ms": 1.8717085,
+          "min_ms": 1.456514,
+          "max_ms": 8.413809
+        }
+      },
+      "timing_scope": "CPU MFE + normalization + INT8 input quantization when used; reference Invoke only. Input tensor copy, score readout, WAV I/O and plotting excluded.",
+      "source_report_sha256": "7d9ff6afb4221ceaf9c2a24663634216e96c645c02e039d558456aa7a03f8c50",
+      "rows_sha256": "d024d862648a52ae43aeaa8b46e00f69abf324a9cbd314118c903dcf7044d22e"
+    },
+    "cpu_int8": {
+      "runtime": {
+        "engine": "TensorFlow Lite",
+        "version": "2.21.0",
+        "resolver": "BUILTIN_REF",
+        "threads": 1,
+        "device": "CPU",
+        "precision": "INT8"
+      },
+      "summary": {
+        "preprocessing_ms": {
+          "median_ms": 0.17817850000000002,
+          "p95_ms": 0.26980625,
+          "min_ms": 0.169178,
+          "max_ms": 0.506345
+        },
+        "inference_ms": {
+          "median_ms": 1.931509,
+          "p95_ms": 2.30094725,
+          "min_ms": 1.890449,
+          "max_ms": 3.128005
+        },
+        "processing_ms": {
+          "median_ms": 2.1129965000000004,
+          "p95_ms": 2.50188755,
+          "min_ms": 2.073087,
+          "max_ms": 3.445832
+        }
+      },
+      "timing_scope": "CPU MFE + normalization + INT8 input quantization when used; reference Invoke only. Input tensor copy, score readout, WAV I/O and plotting excluded.",
+      "source_report_sha256": "6128393c2fa90ae0c6d230e119dd32fda358d2414edd82a603f04cc702792822",
+      "rows_sha256": "31c5b2ac5fabfa58683f419c0cf3345f8515cef9a78b5b6be38b277d37e4cd0f"
+    },
+    "board_int8": {
+      "runtime": {
+        "engine": "TFLM",
+        "hello": {
+          "type": "hello",
+          "seq": 1,
+          "ready": true,
+          "app": "tinyml_aula_v3",
+          "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+          "clock_hz": 133000000
+        },
+        "port": "COM5"
+      },
+      "summary": {
+        "preprocessing_ms": {
+          "median_ms": 1010.53,
+          "p95_ms": 1011.7863,
+          "min_ms": 1008.756,
+          "max_ms": 1012.219
+        },
+        "inference_ms": {
+          "median_ms": 312.077,
+          "p95_ms": 312.103,
+          "min_ms": 312.036,
+          "max_ms": 312.341
+        },
+        "processing_ms": {
+          "median_ms": 1322.6075,
+          "p95_ms": 1323.86475,
+          "min_ms": 1320.836,
+          "max_ms": 1324.303
+        }
+      },
+      "timing_scope": "Firmware timestamp MFE and Invoke; excludes USB/acquisition/display. including_usb_ms is separate host wall time, not added to compute time. Hello records the actual firmware; this is not an old build resource audit.",
+      "source_report_sha256": "bb4260507279f5a8c743f5e1cf8e2eadf760d0e020388428a5f92fda58139e95",
+      "rows_sha256": "b8783ed2b19bbb351cc036e22a00a1c7d65646c60e4822f91482f6a267d5565b"
+    }
+  },
+  "paired_window_score_comparisons": {
+    "cpu_float__gpu_float": {
+      "mean_absolute_score_difference": 7.094815373420716e-08,
+      "max_absolute_score_difference": 2.682209014892578e-07,
+      "same_window_decisions_at_common_int8_threshold": 100,
+      "window_count": 100,
+      "scope": "illustrative window agreement, not patient-level accuracy"
+    },
+    "cpu_float_lite__cpu_int8": {
+      "mean_absolute_score_difference": 0.014536933526396751,
+      "max_absolute_score_difference": 0.058663636445999146,
+      "same_window_decisions_at_common_int8_threshold": 98,
+      "window_count": 100,
+      "scope": "illustrative window agreement, not patient-level accuracy"
+    },
+    "cpu_int8__board_int8": {
+      "mean_absolute_score_difference": 0.0,
+      "max_absolute_score_difference": 0.0,
+      "same_window_decisions_at_common_int8_threshold": 100,
+      "window_count": 100,
+      "scope": "illustrative window agreement, not patient-level accuracy"
+    }
+  },
+  "float_tflite_bytes": 7984,
+  "int8_tflite_bytes": 5264,
+  "file_size_reduction_percent": 34.06813627254509,
+  "limitations": [
+    "Fixed order of modes in one session; no claim of thermally controlled hardware isolation",
+    "Three repeats of correlated validation windows, not independent patients",
+    "TF graph call includes synchronization/readback; Lite Invoke and firmware timestamps have different scopes",
+    "MFE still runs on CPU for the GPU mode",
+    "No peak RAM/energy measurement; no new training or test-based tuning",
+    "Current board firmware is the V3 demonstration build, not the historical scientific resource-measurement build"
+  ]
+}

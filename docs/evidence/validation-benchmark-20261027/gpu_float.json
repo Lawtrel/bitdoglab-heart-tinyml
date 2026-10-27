@@ -1,0 +1,58 @@
+{
+  "status": "complete",
+  "kind": "fresh_validation_compute_benchmark_not_test_accuracy",
+  "mode": "gpu_float",
+  "fingerprint": "ad6ee55b78bb0edaf4150b08601162e3dd927be64a84f61c1482cf541273c6bd",
+  "started_utc": "2026-10-27T14:16:58.901791+00:00",
+  "plan_sha256": "f2d1ec57ad19ceb93a2836ae23a6cd8c9e1db519076cd85e149618f35394fcba",
+  "script_sha256": "ff34a892d07a102e2ce2287ffbfbf8f7c141b6aaa3959a6367e64aced8803aa2",
+  "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+  "float_model_sha256": "0adfd1f85827153d8b2daac57467424394890b4b7b748c9e24e96bac6638ae1f",
+  "windows": 100,
+  "repetitions": 3,
+  "warmup_calls_per_session": 10,
+  "batch_size": 1,
+  "host": {
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.44",
+    "python": "3.12.15",
+    "numpy": "2.0.2"
+  },
+  "completed_calls": 300,
+  "threshold_int8": 0.7346754807692307,
+  "threshold_float": 0.7251112048442547,
+  "limits": "Validation windows are correlated; do not interpret 300 calls as 300 patients. TF graph dispatch/readback differs from LiteRT Invoke and TFLM Invoke. No energy, peak RAM or isolated quantization speedup measured.",
+  "runtime": {
+    "tensorflow": "2.21.0",
+    "device": "/GPU:0",
+    "tf32": false,
+    "intra_threads": 1,
+    "inter_threads": 1,
+    "gpus": [
+      "NVIDIA GeForce RTX 5050"
+    ]
+  },
+  "timing_scope": "CPU MFE and normalization; tf.function call plus synchronized output.numpy readback. Input tensor creation/upload excluded from inference_ms but included in including_tensor_transfer_ms. No WAV I/O, plotting or training.",
+  "runtime_initialized_utc": "2026-10-27T14:17:01.506424+00:00",
+  "ended_utc": "2026-10-27T14:17:03.543293+00:00",
+  "rows_sha256": "328cf788727c75c3c5bb00fb6e1c5691fe363dc770e45cd0c4002a72c404ab07",
+  "summary": {
+    "preprocessing_ms": {
+      "median_ms": 0.171753,
+      "p95_ms": 0.23774800000000001,
+      "min_ms": 0.152158,
+      "max_ms": 0.514754
+    },
+    "inference_ms": {
+      "median_ms": 0.768254,
+      "p95_ms": 1.73418555,
+      "min_ms": 0.645032,
+      "max_ms": 2.488503
+    },
+    "processing_ms": {
+      "median_ms": 0.9562165,
+      "p95_ms": 1.9130882500000002,
+      "min_ms": 0.799601,
+      "max_ms": 2.727391
+    }
+  }
+}

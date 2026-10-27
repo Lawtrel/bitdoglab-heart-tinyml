@@ -36,9 +36,10 @@ A classificação de sopros cardíacos em microcontroladores exige avaliar conju
 
 \begin{document}
 \maketitle\thispagestyle{firststyle}\slugnote\vspace{-13pt}
-\noindent\textbf{Versão em português para revisão, 24 de outubro de 2026.} A versão de submissão deve ser escrita em inglês. Os resultados são os mesmos do artigo em inglês; esta tradução não representa outro experimento.
+\noindent\textbf{Versão em português para revisão, 27 de outubro de 2026.} A versão de submissão deve ser escrita em inglês. Os resultados são os mesmos do artigo em inglês; esta tradução não representa outro experimento.
 
 \section{Introdução}
+O projeto foi desenvolvido durante as aulas de Introdução à Inteligência Artificial. Um heart murmur é um som adicional associado ao fluxo sanguíneo; pode ser inocente e não equivale, por si só, a diagnóstico de doença \citep{aha_murmurs}.
 Fonocardiogramas (PCGs) representam sons cardíacos como sinais acústicos amostrados. A classificação automática de sopros tem sido investigada com gravações de diferentes focos de ausculta \citep{oliveira2022circor,reyna2023challenge}. Presença de sopro e desfecho clínico são alvos distintos: detectar um sopro não equivale a diagnosticar uma doença. Este trabalho aborda somente a presença de sopro.
 
 A execução em microcontroladores exige mais que um arquivo de modelo pequeno. Sinal de entrada, extração de características, ativações, estruturas do interpretador e aplicação compartilham recursos limitados. TensorFlow Lite for Microcontrollers (TFLM) oferece inferência embarcada \citep{david2021tflm}, mas a viabilidade depende do processamento completo e da implementação na placa.
@@ -85,6 +86,15 @@ A Figura~\ref{fig:examples} apresenta exemplos reais da validação. Selecionou-
 \caption{Trechos reais de três segundos da validação e MFE correspondentes da CirCor DigiScope 1.0.3 \citep{circor103}. Os títulos indicam rótulos herdados do grupo, sem confirmar sopro audível na janela. As imagens espectrais compartilham escala de cores; os eixos de amplitude das formas de onda possuem escalas próprias.}
 \label{fig:examples}\end{figure*}
 
+% Equacoes correspondentes a implementacao congelada; sem novos ajustes.
+Para $x[n]$ com componente DC removida e janela Hann $w[n]=0.5-0.5\cos(2\pi n/128)$,
+\begin{align}
+X_t[k]&=\sum_{n=0}^{127}x[64t+n]w[n]e^{-j2\pi kn/128},\\
+E_{t,b}&=\sum_{k=0}^{64}H_b[k]|X_t[k]|^2,\\
+z_{t,b}&=(\log(\max(E_{t,b},10^{-6}))-\mu_b)/\sigma_b.
+\end{align}
+Os 24 filtros usam $m(f)=2595\log_{10}(1+f/700)$; $\mu_b$ e $\sigma_b$ provêm apenas de training. São $1+\lfloor(12000-128)/64\rfloor=186$ frames e 4.464 features.
+
 \subsection{Rede e treinamento offline}
 A CNN possui convoluções $3\times3$ com 8 e 16 canais, cada uma seguida de ativação linear retificada (ReLU) e max pooling $2\times2$, além de média global e saída softmax de duas classes. As convoluções usam preenchimento \textit{same} e passo unitário; pooling usa \textit{valid} e passo dois. O modelo tem 1.282 parâmetros treináveis.
 
@@ -93,6 +103,8 @@ Empregou-se Adam com taxa $10^{-3}$, lotes de 32 e no máximo 100 épocas, encer
 Foram treinadas sementes 42, 43 e 44. Os melhores checkpoints tiveram F1 de validação 0,451, 0,711 e 0,618; selecionou-se a semente 43, época 66. Esses valores são seleção de modelo, não três testes independentes. O treino ocorreu em RTX 5050, Arch Linux/WSL, TensorFlow 2.21, Python 3.12.15, NumPy 2.0.2 e SciPy 1.15.3.
 
 A quantização pós-treino empregou 300 janelas de treino. O grafo convertido contém convolução, max pooling, média, camada totalmente conectada e softmax, com entrada e saída INT8, conforme a especificação \citep{int8spec}. O arquivo final ocupa 5.264 bytes. Não houve busca de arquiteturas ou ablação; o modelo não representa uma fronteira ótima entre desempenho e recursos.
+
+Em INT8, $q=\operatorname{clip}(\operatorname{round}(z/s)+z_0,-128,127)$ e $\hat z=s(q-z_0)$. O arredondamento é feito para longe de zero em empates. No input, $(s,z_0)=(0.04310979694,-38)$; no output, $(s,z_0)=(1/256,-128)$. O tensor de input usa 4.464 bytes em INT8 ou 17.856 em Float32. Isso não implica firmware quatro vezes menor ou mais rápido. Bias e accumulators usam INT32; o MFE permanece floating point. As camadas têm 80, 1.168 e 34 parâmetros, totalizando 1.282.
 
 \subsection{Implementação na placa}
 Uma aplicação C/C++ executa MFE e TFLM na BitDogLab RP2040, alvo \texttt{pico\_w}, core 0 a 133 MHz, sem comunicação sem fio ou carga no segundo núcleo. O RP2040 possui 264 KiB de memória estática (SRAM) \citep{rp2040docs}; a revisão física da placa não foi registrada independentemente.
@@ -188,8 +200,22 @@ Combinado & 1.318,405 & 1.319,889 & 1.323,475\\\bottomrule
 \end{tabular}\end{table}
 % TODO: instrumentar pico de RAM e uso de pilha em experimento separado.
 
+\subsection{Benchmark suplementar de CPU, RTX e INT8}
+Em sessão separada de 27/10, repetiram-se as mesmas 100 janelas de validation do benchmark anterior: dez warm-up calls excluídas, três repetições e batch size um. CPU/RTX Float32 usaram TensorFlow 2.21 com leitura sincronizada do output, excluindo criação/upload do input; MFE permaneceu na CPU. Float32/INT8 na CPU usaram TFLite 2.21 \texttt{BUILTIN\_REF}, uma thread e tempo de Invoke. A placa executou a demonstração V3 auditada a 133 MHz, diferente do firmware da Tabela~\ref{tab:resources}.
+\begin{table}[t]\centering
+\caption{Benchmark suplementar: 300 chamadas por modo, medianas em ms.}\label{tab:fresh}
+\begin{tabular}{lrr}\toprule
+Execução & Inference & MFE + rede\\\midrule
+CPU Float32 (TF) & 0,661 & 0,836\\
+RTX Float32 (TF) & 0,768 & 0,956\\
+CPU Float32 (ref.) & 1,347 & 1,509\\
+CPU INT8 (ref.) & 1,932 & 2,113\\
+RP2040 INT8 (V3) & 312,077 & 1.322,608\\\bottomrule
+\end{tabular}\end{table}
+O TFLite Float32 ocupou 7.984 bytes contra 5.264 em INT8 (redução de 34,1\%); a conversão concordou com a saída do modelo CPU até $4,77\times10^{-7}$. INT8 não reduziu a latência no reference kernel de CPU. A diferença média absoluta dos window scores Float32/INT8 foi 0,01454, com duas decisões diferentes em cem usando o mesmo threshold INT8. Isso não é accuracy por paciente. Placa e CPU INT8 tiveram os mesmos scores nas cem janelas. A RTX não reduziu a latência individual nesta sessão; dispatch/readback é uma hipótese não isolada. Janelas correlacionadas, ordem fixa dos modos e escopos de tempo distintos limitam conclusões sobre hardware. Não houve novo training, ajuste de threshold ou substituição dos resultados do test set.
+
 \subsection{Reprodutibilidade e evidências restantes}
-Foram preservados inventário, manifesto de grupos, históricos de treino, recibo de exportação, predições originais, auditoria do binário e diários USB. O modelo tem prefixo SHA256 \texttt{3b7e258e26ca}; recibos contêm o digest completo e hashes das fontes. Os artefatos estão armazenados localmente, sem repositório público publicado. Não foram adquiridas novas gravações de participantes.
+Foram preservados inventário, manifesto de grupos, históricos de treino, recibo de exportação, predições originais, auditoria do binário e diários USB. O modelo tem prefixo SHA256 \texttt{3b7e258e26ca}; recibos contêm o digest completo e hashes das fontes. Os diários brutos permanecem locais; código, evidências curadas e materiais didáticos estão em \url{https://github.com/Lawtrel/bitdoglab-heart-tinyml}. Não foram adquiridas novas gravações de participantes.
 
 Avaliação original no host, benchmark de validação e teste completo na placa são evidências fixadas. A retomada preservou pesos, limiares, ordem e tolerâncias. Experimentos acústicos, diagnósticos numéricos e memória exigem configurações separadas. Não houve mudanças de modelo, agregação ou limiar a partir do teste concluído.
 

@@ -1,0 +1,60 @@
+{
+  "status": "complete",
+  "kind": "fresh_validation_compute_benchmark_not_test_accuracy",
+  "mode": "board_int8",
+  "fingerprint": "4b6b5b1c0e7b824c7386f75b157e4d59a51af15841ad72598823f13240b25fab",
+  "started_utc": "2026-10-27T14:25:34.151115+00:00",
+  "plan_sha256": "f2d1ec57ad19ceb93a2836ae23a6cd8c9e1db519076cd85e149618f35394fcba",
+  "script_sha256": "ff34a892d07a102e2ce2287ffbfbf8f7c141b6aaa3959a6367e64aced8803aa2",
+  "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+  "float_model_sha256": "0adfd1f85827153d8b2daac57467424394890b4b7b748c9e24e96bac6638ae1f",
+  "windows": 100,
+  "repetitions": 3,
+  "warmup_calls_per_session": 10,
+  "batch_size": 1,
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.14",
+    "numpy": "2.0.2"
+  },
+  "completed_calls": 300,
+  "threshold_int8": 0.7346754807692307,
+  "threshold_float": 0.7251112048442547,
+  "limits": "Validation windows are correlated; do not interpret 300 calls as 300 patients. TF graph dispatch/readback differs from LiteRT Invoke and TFLM Invoke. No energy, peak RAM or isolated quantization speedup measured.",
+  "runtime": {
+    "engine": "TFLM",
+    "hello": {
+      "type": "hello",
+      "seq": 1,
+      "ready": true,
+      "app": "tinyml_aula_v3",
+      "model_sha256": "3b7e258e26ca124d9e973ba8b4ac5744c87c3ed1d41f501192d2ca7a0b185454",
+      "clock_hz": 133000000
+    },
+    "port": "COM5"
+  },
+  "timing_scope": "Firmware timestamp MFE and Invoke; excludes USB/acquisition/display. including_usb_ms is separate host wall time, not added to compute time. Hello records the actual firmware; this is not an old build resource audit.",
+  "runtime_initialized_utc": "2026-10-27T14:25:34.320821+00:00",
+  "ended_utc": "2026-10-27T14:36:09.134199+00:00",
+  "rows_sha256": "b8783ed2b19bbb351cc036e22a00a1c7d65646c60e4822f91482f6a267d5565b",
+  "summary": {
+    "preprocessing_ms": {
+      "median_ms": 1010.53,
+      "p95_ms": 1011.7863,
+      "min_ms": 1008.756,
+      "max_ms": 1012.219
+    },
+    "inference_ms": {
+      "median_ms": 312.077,
+      "p95_ms": 312.103,
+      "min_ms": 312.036,
+      "max_ms": 312.341
+    },
+    "processing_ms": {
+      "median_ms": 1322.6075,
+      "p95_ms": 1323.86475,
+      "min_ms": 1320.836,
+      "max_ms": 1324.303
+    }
+  }
+}

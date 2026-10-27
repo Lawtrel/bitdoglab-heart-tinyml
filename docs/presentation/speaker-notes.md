@@ -1,147 +1,171 @@
-# Roteiro de fala — TinyML na BitDogLab
+# Roteiro — TinyML na BitDogLab
 
-Proposta: 15 a 18 minutos, com ensaio da demonstração antes da aula. Apresentador: Leandro. As notas também estão nos slides.
+Sugestão: 25 minutos mais demonstração. Português na explicação, termos técnicos em inglês. Pule as contas detalhadas se a aula for mais curta; o guia mantém o desenvolvimento completo.
 
-## 1. TinyML na BitDogLab
+## 1. Uma rede neural dentro da BitDogLab
 
-Tempo sugerido: 0:30
+Eu queria entender TinyML usando uma placa que já tinha. Escolhi sons cardíacos como caso de estudo. Vou mostrar como preparei os dados, treinei a rede no computador, reduzi o modelo e conferi sua execução na placa. Também vou mostrar os erros que encontrei.
 
-Hoje vou mostrar como uma rede neural treinada no computador pode executar em uma BitDogLab. O caso de estudo é classificar gravações com rótulos de sopro presente ou ausente. Vamos entender o caminho do áudio, comparar os resultados e demonstrar a execução. O objetivo científico é medir a viabilidade e os limites em um microcontrolador. Não apresento a placa como um exame médico.
+Fontes: Artigo main.tex e relatórios congelados de CirCor 1.0.3; https://github.com/Lawtrel/bitdoglab-heart-tinyml
 
-Fontes: Artigo local main.tex; David et al., MLSys 2021
+## 2. Minha pergunta
 
-## 2. Treinamento e inferência
+O PC é muito mais potente. Minha pergunta não é se a placa vai ganhar dele em velocidade. Quero saber se uma rede pequena cabe, executa e mantém um desempenho mensurável. Por isso separo a qualidade das previsões do tempo e da memória.
 
-Tempo sugerido: 1:00
+Fontes: Artigo main.tex e relatórios congelados de CirCor 1.0.3; https://github.com/Lawtrel/bitdoglab-heart-tinyml
 
-Treinar é ajustar os pesos usando exemplos rotulados. Essa etapa ocorreu no computador, com apoio da GPU. Inferir é usar os pesos já aprendidos para analisar uma entrada. Essa etapa pode rodar na placa, sem internet. Neste projeto a placa não treina. No benchmark que vou mostrar, a execução do PC foi medida na CPU, com uma thread, e não na RTX. A finalidade é comparar implementações do modelo congelado.
+## 3. Training e inference
 
-Fontes: David et al. https://proceedings.mlsys.org/paper_files/paper/2021/hash/6c44dc73014d66ba49b28d483a8f8b0d-Abstract.html; training.json; reports/pc_validation_benchmark.json
+No training, a rede ajusta números internos chamados weights. A RTX ajudou nessa etapa. Na inference, esses números não mudam: o modelo recebe um áudio e calcula scores. A comparação de tempo antiga do PC foi feita na CPU. Ela não é uma medida de RTX inference.
 
-## 3. O que a rede classifica
+Fontes: David et al., TensorFlow Lite Micro, MLSys 2021; training.json
 
-Tempo sugerido: 0:55
+## 4. Com sopro e sem sopro
 
-Sopro é um som adicional percebido na ausculta. Existem sopros inocentes e sopros associados a alterações cardíacas. Por isso não vou usar as expressões coração saudável ou coração doente para as duas classes. Quando o OLED mostra sem sopro, ele está apresentando a previsão da rede para aquele trecho. A rede também não foi treinada para medir os batimentos por minuto. Como só há duas classes, fala e ruído podem receber uma delas.
+Os sons S1 e S2 fazem parte do ciclo cardíaco. Um heart murmur é um som adicional; pode ser inocente ou estar associado a alguma alteração. Não vou chamar as classes de coração saudável e doente. No dataset, o rótulo é do grupo, não de cada trecho de três segundos. Este desenho foi criado apenas para explicar, não é uma gravação nem uma segmentação de paciente.
 
-Fontes: American Heart Association, Heart Murmurs, revisão 17/03/2026: https://www.heart.org/en/health-topics/heart-murmurs
+Fontes: AHA Heart Murmurs https://www.heart.org/en/health-topics/heart-murmurs; CirCor 1.0.3
 
-## 4. Dados e divisão por grupo
+## 5. Ouvir os exemplos
 
-Tempo sugerido: 0:55
+Neste ponto eu abro o painel e reproduzo os áudios 1 e 2. Primeiro peço que a turma apenas ouça. Depois mostro a inference. Não apresento minha própria escuta como confirmação clínica. Foram escolhidos seis grupos de validation por identificador, antes de ver os scores, sem selecionar os melhores acertos. Os WAVs estão no pacote para usar sem depender da internet.
 
-Usamos o CirCor DigiScope. Depois dos critérios do estudo, são 812 grupos vinculados e 2.976 gravações. Há várias gravações por pessoa e possíveis vínculos entre registros. Dividir os WAVs aleatoriamente poderia colocar a mesma identidade nos dois lados e inflar o resultado. A divisão foi feita antes do treinamento, preservando os grupos. A validação serviu para seleção e limiar; o teste final ficou separado. Não alteramos o limiar depois de examinar o teste.
+Fontes: audio-catalog.json; licença ODC-By, CirCor 1.0.3
 
-Fontes: split-manifest.json; artigo local Materials and Methods; Oliveira et al. 2022, DOI 10.1109/JBHI.2021.3137048; PhysioNet CirCor 1.0.3 https://physionet.org/content/circor-heart-sound/1.0.3/
+## 6. Split antes do training
 
-## 5. O áudio vira uma representação MFE
+Se a mesma pessoa aparecer no training e no test, a rede pode reconhecer características dessa pessoa e o resultado parecer melhor do que é. Agrupei identidades vinculadas e duplicatas antes do split. As windows de um grupo ficam juntas. Usei training para ajustar a rede, validation para escolher o checkpoint e o threshold, e test para a avaliação final. Os vínculos conhecidos foram preservados; vínculos não anotados continuam sendo uma limitação.
 
-Tempo sugerido: 0:55
+Fontes: Artigo main.tex e relatórios congelados de CirCor 1.0.3; https://github.com/Lawtrel/bitdoglab-heart-tinyml
 
-Aqui estão a forma de onda e a representação MFE calculadas de um dos áudios de demonstração. Cada coluna do mapa corresponde a um intervalo curto e cada linha a um filtro mel. A cor representa log-energia. Essa transformação organiza os padrões do áudio para a rede. São três segundos a 4 kHz, com 12 mil amostras. O mapa tem 186 posições de tempo e 24 filtros. As estatísticas de normalização foram aprendidas apenas no treino. Este exemplo é da validação, não uma nova medição clínica.
+## 7. Do som aos números
 
-Fontes: engine.py; pcg/features.py; demo_samples.h, gravação 49627_AV da validação; figura original gerada dos mesmos dados PCM
+A rede não escuta como nós. Primeiro represento o som por samples. A waveform mostra a amplitude no tempo. No MFE, cada linha corresponde a uma Mel band, cada coluna a um frame e a cor representa log-energy. É uma forma de organizar padrões do áudio para a CNN. O gráfico é do mesmo exemplo que podemos ouvir.
 
-## 6. Uma CNN pequena para o RP2040
+Fontes: pcg/features.py; exemplo 49627_AV, validation
 
-Tempo sugerido: 0:50
+## 8. Contando as entradas
 
-A CNN usa duas camadas convolucionais pequenas, com oito e dezesseis filtros, e operações de redução espacial. Depois há média global e uma camada com duas saídas. No total são 1.282 parâmetros. Parâmetros são os números aprendidos no treinamento. Não programamos manualmente uma lista de batimentos. A execução usa operações matemáticas sobre o áudio transformado, e por isso é possível receber uma entrada diferente dos exemplos embutidos.
+São três segundos a 4 kHz. Isso dá 12 mil samples, ocupando 24 mil bytes em PCM16. Divido a window em frames de 128 samples com hop de 64. Sem centered padding, a fórmula produz 186 frames. Cada frame terá 24 features. São 4.464 valores na entrada da rede. O guia mostra as fórmulas completas.
 
-Fontes: Artigo local, arquitetura; model/model_int8.tflite; training.json
+Fontes: signal.py; frontend_config.h
 
-## 7. Quantização e implantação
+## 9. Calculando o MFE
 
-Tempo sugerido: 0:50
+Depois de remover a componente DC, aplico uma Hann window e a FFT. Calculo o power spectrum sem duplicar os bins positivos. Cada filtro triangular soma a energia de uma região; depois aplico log e normalization. Os coeficientes de normalization foram aprendidos só no training. Se eu usasse o test para ajustar essas estatísticas, haveria leakage.
 
-Quantizar muda a representação numérica. Em vez de armazenar cada valor como ponto flutuante de 32 bits, usamos inteiros de oito bits com escala e ponto zero. O arquivo final tem 5.264 bytes. A relação quatro para um descreve um número isolado, não garante que todo firmware ou toda memória caia quatro vezes. A exportação foi calibrada com dados do treino e testada. Em seguida o TFLite Micro executa esse modelo no RP2040.
+Fontes: signal.py; guia matemático, equações 1 a 5
 
-Fontes: export.json; https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/performance/quantization_spec.md; David et al. 2021
+## 10. Tamanho da CNN
 
-## 8. Como o experimento foi avaliado
+Uma Conv2D aprende filtros locais do MFE. Depois de cada Conv2D, há ReLU e MaxPool. Global Average Pooling resume os canais e Dense produz dois logits. A Softmax transforma esses logits em scores. Incluindo bias, a primeira camada tem 80 parâmetros; a segunda 1.168; a saída 34. O total é 1.282. Não fiz architecture search para provar que essa era a melhor rede possível.
 
-Tempo sugerido: 0:45
+Fontes: research/pcg/learning.py build_model
 
-A avaliação completa na placa processou 6.512 janelas de 471 gravações. As métricas finais são por grupo, totalizando 122 grupos. Isso é diferente de apertar A e observar uma classificação de três segundos. A demonstração ilustra a execução, enquanto o experimento estima o desempenho no conjunto separado. O replay digital permite controlar quais amostras chegam à placa e comparar com o computador. A aquisição pelo microfone não fazia parte desse teste.
+## 11. Curvas do training
 
-Fontes: runs/board-test-circor-20261023/session.json e reports; protocolo congelado
+Estes são os CSVs salvos no training real. A loss é weighted cross-entropy, com pesos que equilibram classes e a contribuição de cada grupo. Usei Adam, learning rate 0,001 e batch size 32. Treinei três seeds. Early stopping interrompia após dez épocas sem melhora estrita do F1 em validation. Escolhi seed 43, epoch 66. As oscilações não são resultados de test.
 
-## 9. Desempenho no PC e na placa
+Fontes: model/seed_42/history.csv; seed_43/history.csv; seed_44/history.csv; training.json
 
-Tempo sugerido: 0:55
+## 12. O significado de INT8
 
-Esta tabela mostra o resultado científico. Float no PC, INT8 de referência e INT8 na placa tiveram as mesmas decisões por grupo. O host otimizado teve um falso positivo a mais. Isso não significa que a placa deixou a rede mais inteligente. Há diferenças numéricas entre implementações e o limiar pode transformar uma pequena diferença em outra decisão. Mantivemos esse resultado no artigo. Recall, ou sensibilidade, diz quantos positivos foram identificados. F1 combina precisão e recall.
+INT8 é um signed integer de oito bits. Em vez de guardar qualquer número real com Float32, represento uma faixa por 256 códigos. A scale diz quanto vale cada passo e o zero-point representa o zero real. Essa aproximação reduz armazenamento de tensores e permite integer kernels. Não significa que todo o programa virou inteiro: o MFE continua floating point.
 
-Fontes: model/reports/float_cnn_metrics.json; int8_host_metrics.json; board-test-circor-20261023/reports/runtime_comparison.json
+Fontes: Google AI Edge LiteRT 8-bit quantization specification
 
-## 10. Os erros também fazem parte do resultado
+## 13. Exemplo de quantization
 
-Tempo sugerido: 0:55
+A scale mostrada foi lida do próprio arquivo TFLite. Para facilitar a conta, uso uma feature ilustrativa de valor um. O código INT8 é menos quinze; ao reconstruir, obtenho aproximadamente 0,9915. Essa pequena diferença é o custo da aproximação. Isso não é um score de paciente. Na saída Softmax, a scale é 1/256 e o zero-point é menos 128.
 
-A matriz torna os erros concretos. Entre os 24 grupos com sopro, identificamos 17 e perdemos sete. Entre os 98 sem sopro, houve oito falsos positivos e noventa negativos corretos. Acurácia sozinha pode parecer boa porque há mais negativos. Classificar todos como ausentes já acertaria 98 de 122, cerca de 80,3%, mas não identificaria nenhum positivo. Por isso mostro F1, recall e a matriz, sem apresentar 87,7% como prova de uso clínico.
+Fontes: calculos-verificados.json; modelo INT8 congelado
 
-Fontes: int8_rp2040_metrics.json; majority_baseline_metrics.json; contagens do teste preservado
+## 14. Economia e aproximação
 
-## 11. F1 entre implementações
+Para o mesmo número de elementos, Float32 usa quatro bytes e INT8 usa um. Este gráfico calcula apenas o input tensor: 17.856 contra 4.464 bytes. O arquivo completo tem grafo e metadados; não posso multiplicar 5.264 por quatro para deduzir seu tamanho Float32. Também não posso prometer um speedup só por usar INT8. O novo benchmark mede isso em uma comparação de CPU com o mesmo resolver.
 
-Tempo sugerido: 0:35
+Fontes: calculos-verificados.json; LiteRT quantization spec
 
-O gráfico facilita comparar as implementações. F1 mais alto indica melhor combinação de precisão e recall neste conjunto. A diferença do host otimizado é pequena, e o intervalo da placa é amplo: de 0,526 a 0,829. São apenas 24 grupos positivos no teste. Não há base para afirmar superioridade estatística da placa ou generalização clínica. As barras mostram os valores pontuais; o intervalo citado abaixo pertence à placa.
+## 15. Agregação e threshold
 
-Fontes: Métricas reais de teste; bootstrap 2.000 replicações, seed 2026, agrupado por paciente
+O score de uma única window no painel não é a métrica científica do paciente. Primeiro faço mean das windows de uma recording. Depois tomo o maximum entre recordings do grupo. Comparo com o threshold escolhido em validation. Esse threshold foi congelado antes do test. Não mudei o limiar para deixar a demonstração mais bonita.
 
-## 12. Tempo no PC e na BitDogLab
+Fontes: research/pcg/metrics.py aggregate e select_threshold; export.json
 
-Tempo sugerido: 0:55
+## 16. O experimento na placa
 
-Este é um ensaio suplementar de latência, separado das métricas do teste. Foram usadas as mesmas cem primeiras janelas de três segundos do benchmark de validação já medido na placa. O PC teve dez aquecimentos excluídos, LiteRT de referência em uma thread e bibliotecas NumPy para o MFE. A placa usa C++ e TFLite Micro. Por isso a diferença inclui implementação e ambiente. Os tempos da placa são históricos e os do PC foram coletados nesta preparação. Não é uma comparação com a RTX, nem uma medida isolada da vantagem do INT8.
+O experimento científico foi digital replay. O PC enviava uma window PCM16 à placa; ela calculava as features e executava o modelo. Registrei a resposta imediatamente. Um timeout interrompeu a primeira sessão depois de 1.293 windows e a coleta foi retomada com o mesmo protocolo. O teste só foi liberado quando as 6.512 respostas foram concluídas e auditadas. Microfone e OLED não entram nesses tempos.
 
-Fontes: reports/pc_validation_benchmark.json; pc_validation_timings.csv; board-validation-20261023-114223/timings.csv; exclui I/O, aquisição, USB, OLED, cópia do tensor e gráficos
+Fontes: board-test-circor-20261023/protocol.json, journal e relatórios; artigo Experimental Setup
 
-## 13. Tempo combinado no PC e na placa
+## 17. Resultados medidos
 
-Tempo sugerido: 0:45
+Aqui estão as métricas do test completo, não dos seis exemplos. O resultado da placa foi F1 0,694 e Recall 70,8%. A implementação INT8 optimized no PC teve um falso positivo a mais que a reference e a placa. Float32 e placa têm os mesmos counts, mas isso não significa scores idênticos. A tarefa é binária e exclui Unknown; não comparei esses números diretamente com rankings de três classes.
 
-O gráfico compara o tempo combinado para as mesmas cem janelas de validação. A barra do PC é muito pequena nesta escala porque a mediana foi 2,687 milissegundos, enquanto a placa levou 1.318,421 milissegundos. Há diferenças de implementação e ambiente: NumPy e LiteRT no PC, C++ e TFLite Micro na placa. Não é possível atribuir essa razão apenas ao processador ou ao INT8. O ponto científico é que a placa conseguiu executar localmente com um custo medido. No teste completo, a mediana da placa foi 1,318 segundo. A maior parte do tempo na placa está no MFE, como mostra a tabela anterior.
+Fontes: Artigo main.tex e relatórios congelados de CirCor 1.0.3; https://github.com/Lawtrel/bitdoglab-heart-tinyml
 
-Fontes: reports/pc_validation_benchmark.json; mesmos cem WAVs de validação, dez aquecimentos excluídos; medidas históricas da placa, não simultâneas
+## 18. Acertos e erros
 
-## 14. Recursos do firmware científico
+Quero chamar atenção para os sete false negatives. São grupos rotulados com sopro que o modelo não identificou. Também houve oito false positives. Esses erros são parte do resultado, não detalhes que eu deveria esconder. É por isso que não trato o protótipo como um diagnóstico.
 
-Tempo sugerido: 0:40
+Fontes: int8_rp2040_metrics.json; patient predictions
 
-O modelo é pequeno, mas o programa completo também precisa de código de processamento, buffers e memória para os tensores. A imagem flash do firmware científico tem 189.408 bytes. O espaço estático principal de SRAM é 186.224 bytes. Isso não é pico medido de RAM, e a arena já está dentro dessas reservas; não devemos somá-la de novo. A demonstração visual contém áudios embutidos e outros recursos, por isso usa mais flash e não substitui estes números do artigo.
+## 19. Contas das métricas
 
-Fontes: outputs/firmware-bitdoglab/build-usbfix-20261023-113636/resource-report.json e build-audit.json; fontes científicas preservadas
+Recall pergunta quantos positivos a rede encontrou: 17 de 24. Precision é 17 de 25 previsões positivas, ou 68%. F1 equilibra Precision e Recall: 34 dividido por 49. Accuracy divide todos os acertos pelos 122 grupos. Como há 98 negativos, um modelo que nunca detecta sopro já teria 80,3% de Accuracy. Por isso o F1 e o Recall são importantes. O IC95% de F1 foi 0,526 a 0,829, mostrando incerteza grande.
 
-## 15. Demonstração com o mesmo arquivo
+Fontes: Relatórios do teste completo; patient bootstrap 2.000 repetições, seed 2026
 
-Tempo sugerido: 2:00, incluindo interação
+## 20. Por que os resultados parecem iguais
 
-Abra ABRIR_AULA_TINYML.cmd antes da aula e confirme o painel. Escolha Exemplo 1, reproduza o trecho e clique Analisar no PC. Aponte a onda, o MFE e o escore. Se a V3 tiver sido compilada, gravada e ensaiada, clique Comparar com a placa. Os mesmos dados PCM seguem pela USB e a placa calcula sua própria saída. Repita com Exemplo 2. Se houver problema de USB, use A na V2 como alternativa já conferida: explique que a entrada vem da memória da placa, não do alto-falante. Não afirme que a V3 foi testada antes do ensaio real.
+O modelo e os dados são os mesmos. É desejável que a classe final seja preservada ao mudar de máquina. A diferença de hardware aparece principalmente no custo para executar. Mesmo com as mesmas decisões por grupo, houve 86 windows com feature CRC diferente e 160 com output score diferente contra reference. A diferença máxima de score foi 0,0078125. Não declarei equivalência bit a bit.
 
-Fontes: app.py; engine.py; board_link.py; firmware-aula/main.cpp; A na V2 confirmado manualmente pelo usuário em 24/10/2026
+Fontes: Relatórios e auditoria do teste completo; não são três trials independentes
 
-## 16. Microfone: um novo experimento
+## 21. Tempos históricos
 
-Tempo sugerido: 1:15, incluindo interação
+Estas medidas antigas usam as mesmas 100 windows de validation. O PC executou na CPU com uma thread; a RTX não aparece nesta tabela. Na placa, feature extraction consumiu mais tempo que a inference. Há implementações diferentes de FFT e runtime, e as medições não foram simultâneas. USB, reprodução, aquisição e OLED foram excluídos. Não interpreto a diferença como efeito isolado de quantization.
 
-Este ensaio mostra uma entrada acústica. Prepare um celular com uma gravação de origem conhecida. Pressione B, aguarde o aviso e reproduza o som durante os três segundos de captura. Na V3 o painel também pode comandar a captura e analisar no PC o mesmo PCM recebido da placa. O resultado pode mudar porque alto-falante, sala, distância e microfone mudam o sinal. O LED azul e a interrogação identificam o caráter experimental. Fala e ruído também podem receber uma classe. Se a captura falhar, mostre a limitação e siga, sem escolher apenas acertos para alegar desempenho. Não encoste a placa no peito prometendo detectar sopro.
+Fontes: pc_validation_benchmark.json e board-validation-20261023-114223/timings.csv
 
-Fontes: firmware-aula/microphone.h; protocolo didático separado; aquisição original CirCor por ausculta eletrônica, https://physionet.org/content/circor-heart-sound/1.0.3/
+## 22. Novo benchmark completo
 
-## 17. O que este projeto demonstrou
+Agora há medidas reais de RTX inference. Usei as mesmas 100 windows, dez warm-up calls e três repetições. Float32 CPU/RTX usa TensorFlow e output.numpy para sincronizar; os tempos incluem dispatch e readback. Float32 e INT8 reference usam TFLite 2.21 e uma thread. A placa usa timestamps de MFE e Invoke do firmware V3 a 133 MHz. Os escopos não são perfeitamente idênticos e a ordem dos modos foi fixa; não trato isto como isolamento térmico de hardware. O MFE do modo RTX continua na CPU.
 
-Tempo sugerido: 0:35
+Fontes: benchmark-summary.json; fresh-20261027-111652; auditoria de hashes e 300 respostas por modo
 
-A contribuição é mostrar que uma rede pequena pode executar no RP2040, quantificar o custo e comparar as decisões com o computador. A rede errou, e esses erros fazem parte do resultado. O experimento digital está concluído. A interface ajuda a comunicar o funcionamento. O microfone abre uma investigação nova, que precisa de avaliação própria. O próximo passo científico seria estudar aquisição e robustez, com protocolo separado, sem ajustar o modelo pelo teste que já foi encerrado.
+## 23. CPU e RTX
 
-Fontes: Resultados e limitações do artigo; evidências locais preservadas
+Na sessão medida, a mediana de CPU foi 0,661 ms e a de RTX 0,768 ms. As previsões dos dois modos foram quase iguais: diferença máxima de score de cerca de 0,000000268. Para uma rede tão pequena com batch size um, o custo de dispatch e sincronização é uma explicação possível, mas não foi isolado por este protocolo. Não concluo que a GPU seja pior em geral. Training e throughput de batches maiores são outras perguntas.
 
-## 18. Referências e dados do experimento
+Fontes: cpu_float.json e gpu_float.json; benchmark-summary.json
 
-Tempo sugerido: Consulta após a fala
+## 24. Float32 e INT8 medidos
 
-Referências completas e URLs: Oliveira et al., IEEE JBHI 2022, DOI 10.1109/JBHI.2021.3137048. Dataset CirCor DigiScope 1.0.3, DOI 10.13026/tshs-mw03, https://physionet.org/content/circor-heart-sound/1.0.3/. David et al., MLSys 2021, https://proceedings.mlsys.org/paper_files/paper/2021/hash/6c44dc73014d66ba49b28d483a8f8b0d-Abstract.html. AHA, https://www.heart.org/en/health-topics/heart-murmurs. Hardware BitDogLab: https://github.com/BitDogLab/BitDogLab. RP2040: https://www.raspberrypi.com/documentation/microcontrollers/microcontroller-chips.html. Resultados científicos: runs/board-test-circor-20261023/reports. Comparação suplementar PC: tinyml-aula/reports. A fonte PhysioNet teve falha de acesso nesta sessão; metadados e métodos foram mantidos do material previamente conferido, sem inventar nova consulta.
+A comparação de arquivo agora é entre dois TFLite da mesma arquitetura. Float32 tem 7.984 bytes e INT8 5.264: redução de 34,1%, diferente da conta teórica de quatro vezes para cada tensor. No reference kernel da CPU, INT8 não foi mais rápido. A diferença média absoluta de score foi 0,01454 e a máxima 0,05866. Duas das cem windows mudaram de classe usando o mesmo threshold INT8. Esse é um diagnóstico numérico em validation, não uma nova accuracy clínica. A placa e o CPU INT8 tiveram os mesmos scores nas cem windows.
 
-Fontes: Fontes primárias e relatórios originais do projeto
+Fontes: cpu_float_lite.json, cpu_int8.json, board_int8.json; Float32 conversion check max error 4,77e-7; benchmark-summary.json
+
+## 25. Recursos
+
+Não basta dizer que o modelo tem cinco kilobytes. O programa também precisa de buffers de áudio, features, activations e runtime. A imagem flash científica ocupou 189.408 bytes. O span estático principal de SRAM foi 186.224 bytes, incluindo a reserva da arena. Isso não é peak RAM. O uso máximo da pilha não foi instrumentado. São medidas do firmware científico original, não de qualquer nova demo recompilada.
+
+Fontes: Auditoria ELF/UF2 e relatório de recursos do firmware científico
+
+## 26. Demonstração ao vivo
+
+Eu abro o painel pelo START_WINDOWS e escolho um exemplo. Ouço, mostro o MFE, clico em Analisar no PC e explico o threshold. Com firmware compatível, conecto a USB e comparo exatamente o mesmo PCM. O OLED e os bipes comunicam a previsão da janela. Se a placa não responder, mostro os relatórios preservados e explico a falha; não simulo uma medição. O microfone acrescenta acústica e ruído, e ainda não foi validado.
+
+Fontes: README, docs/firmware.md; audio-catalog.json
+
+## 27. Conclusão
+
+O resultado principal é uma execução completa e mensurada no RP2040, com limites explícitos. Eu compreendi o caminho do som ao modelo e pude comparar implementações. A rede perdeu sete positivos e tem incerteza ampla. Microfone, streaming, robustez e peak RAM são trabalhos futuros. O novo benchmark mostrou diferença de tempo e tamanho e também diferenças numéricas. Ele não transforma o protótipo em um diagnóstico.
+
+Fontes: Artigo e guia matemático
+
+## 28. Referências
+
+As referências completas e as contas estão no guia. O repositório reúne código, firmware, fontes do artigo em inglês e português e relatórios curados. Os CSVs e journals científicos originais foram preservados. Não confundir a execução do benchmark com um novo treinamento. Fontes consultadas em 27/10/2026.
+
+Fontes: https://physionet.org/content/circor-heart-sound/1.0.3/; https://doi.org/10.1109/JBHI.2021.3137048; https://doi.org/10.1371/journal.pdig.0000324; https://proceedings.mlsys.org/paper_files/paper/2021/hash/6c44dc73014d66ba49b28d483a8f8b0d-Abstract.html; https://developers.google.com/edge/litert/conversion/tensorflow/quantization/quantization_spec; https://www.heart.org/en/health-topics/heart-murmurs
